@@ -2,13 +2,13 @@ import 'package:app_tesis/auth/google_sign_in_service.dart';
 import 'package:dio/dio.dart';
 
 import 'api_service.dart';
-import '../models/course.dart';
+import '../models/semester.dart';
 
-class CourseService {
+class SemesterService {
   final ApiService _apiService = ApiService();
 
-  // Get all courses
-  Future<List<Course>> getCourses() async {
+  // Get all semesters
+  Future<List<Semester>> getSemesters() async {
     try {
       final String? token = await GoogleSignInService.getIdToken();
 
@@ -18,7 +18,7 @@ class CourseService {
       }
 
       final response = await _apiService.client.get(
-        '/courses/',
+        '/semesters/',
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
@@ -27,26 +27,26 @@ class CourseService {
       );
 
       final data = response.data as List;
-      return data.map((json) => Course.fromJson(json)).toList();
+      return data.map((json) => Semester.fromJson(json)).toList();
     } on DioException catch (e) {
-      throw Exception('Error fetching courses: ${e.message}');
+      throw Exception('Error fetching semesters: ${e.message}');
     } catch (e) {
       throw Exception('An unexpected error occurred: $e');
     }
   }
 
-  // Get a specific course by ID
-  Future<Course> getCourse(int id) async {
+  // Get a specific semester by ID
+  Future<Semester> getSemester(int id) async {
     try {
-      final response = await _apiService.client.get('/courses/$id');
-      return Course.fromJson(response.data);
+      final response = await _apiService.client.get('/semesters/$id');
+      return Semester.fromJson(response.data);
     } catch (e) {
-      throw Exception('Error fetching course $id: $e');
+      throw Exception('Error fetching semester $id: $e');
     }
   }
 
-  // Get all courses including the amount of semesters in which each course is present
-  Future<List<Course>> getCoursesDetailed() async {
+  // Get all semesters including the amount of courses that are present in each semester
+  Future<List<Semester>> getSemestersDetailed() async {
     try {
       final String? token = await GoogleSignInService.getIdToken();
 
@@ -56,7 +56,7 @@ class CourseService {
       }
 
       final response = await _apiService.client.get(
-        '/courses/detailed',
+        '/semesters/detailed',
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
@@ -65,52 +65,52 @@ class CourseService {
       );
 
       final data = response.data as List;
-      return data.map((json) => Course.fromJson(json)).toList();
+      return data.map((json) => Semester.fromJson(json)).toList();
     } on DioException catch (e) {
-      throw Exception('Error fetching courses: ${e.message}');
+      throw Exception('Error fetching semesters: ${e.message}');
     } catch (e) {
       throw Exception('An unexpected error occurred: $e');
     }
   }
 
-  // Create a new course
-  Future<Course> createCourse(String name, String code) async {
+  // Create a new semester
+  Future<Semester> createSemester(int year, int number) async {
     try {
       final response = await _apiService.client.post(
-        '/courses/',
+        '/semesters/',
         data: {
-          'name': name,
-          'code': code,
+          'year': year,
+          'number': number,
         },
       );
-      return Course.fromJson(response.data);
+      return Semester.fromJson(response.data);
     } catch (e) {
-      throw Exception('Error creating course: $e');
+      throw Exception('Error creating semester: $e');
     }
   }
 
-  // Update an existing course
-  Future<Course> updateCourse(int id, String name, String code) async {
+  // Update an existing semester
+  Future<Semester> updateSemester(int id, int year, int number) async {
     try {
       final response = await _apiService.client.put(
-        '/courses/$id',
+        '/semesters/$id',
         data: {
-          'name': name,
-          'code': code,
+          'year': year,
+          'number': number,
         },
       );
-      return Course.fromJson(response.data);
+      return Semester.fromJson(response.data);
     } catch (e) {
-      throw Exception('Error updating course $id: $e');
+      throw Exception('Error updating semester $id: $e');
     }
   }
 
-  // Delete a course
-  Future<void> deleteCourse(int id) async {
+  // Delete a semester
+  Future<void> deleteSemester(int id) async {
     try {
-      await _apiService.client.delete('/courses/$id');
+      await _apiService.client.delete('/semesters/$id');
     } catch (e) {
-      throw Exception('Error deleting course $id: $e');
+      throw Exception('Error deleting semester $id: $e');
     }
   }
 }
