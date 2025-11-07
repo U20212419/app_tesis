@@ -2,7 +2,7 @@ class Course {
   final int id;
   final String name;
   final String code;
-  final int semesterCount;
+  final int? semesterCount;
 
   Course({
     required this.id,

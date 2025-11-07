@@ -1,3 +1,4 @@
+import 'package:app_tesis/theme/search_field_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
@@ -10,6 +11,7 @@ class SearchAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final TextEditingController searchController;
   final VoidCallback onSearchIconPressed;
+  final VoidCallback? onBackIconPressed;
   final FocusNode? focusNode;
   final String? hintText;
 
@@ -19,17 +21,43 @@ class SearchAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.title,
     required this.searchController,
     required this.onSearchIconPressed,
+    this.onBackIconPressed,
     this.focusNode,
     this.hintText,
   });
 
   @override
   Widget build(BuildContext context) {
+    final SearchFieldTheme? searchFieldTheme = Theme.of(context).extension<SearchFieldTheme>();
+
     return AppBar(
-      titleSpacing: 0,
       title: Stack(
         alignment: Alignment.center,
         children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              padding: EdgeInsets.only(
+                left: SizeConfig.scaleWidth(4.4),
+              ),
+              child: AnimatedOpacity(
+                opacity: (isSearching || onBackIconPressed == null) ? 0.0 : 1.0,
+                duration: const Duration(milliseconds: 250),
+                child: IgnorePointer(
+                  ignoring: (isSearching || onBackIconPressed == null),
+                  child: IconButton(
+                    icon: Icon(
+                      Symbols.arrow_back_rounded,
+                      size: SizeConfig.scaleHeight(3.2),
+                      fill: 1.0,
+                      color: AppColors.highlightDarkest,
+                    ),
+                    onPressed: onBackIconPressed,
+                  ),
+                ),
+              ),
+            ),
+          ),
           AnimatedOpacity(
             opacity: isSearching ? 0.0 : 1.0,
             duration: const Duration(milliseconds: 250),
@@ -48,7 +76,7 @@ class SearchAppBar extends StatelessWidget implements PreferredSizeWidget {
                 child: Container(
                   height: SizeConfig.scaleHeight(5.1),
                   decoration: BoxDecoration(
-                    color: AppColors.neutralLightLight,
+                    color: searchFieldTheme?.backgroundColor ?? AppColors.neutralLightLight,
                     borderRadius: BorderRadius.circular(
                         SizeConfig.scaleHeight(3.8)
                     ),
@@ -70,16 +98,21 @@ class SearchAppBar extends StatelessWidget implements PreferredSizeWidget {
                         focusNode: focusNode,
                         autofocus: false,
                         cursorColor: AppColors.highlightDarkest,
-                        style: AppTextStyles.bodyM().copyWith(
+                        style: searchFieldTheme?.inputTextStyle ?? AppTextStyles.bodyM().copyWith(
                           color: AppColors.neutralDarkDarkest,
                         ),
                         // Placeholder text for the search field
                         decoration: InputDecoration(
                           hintText: hintText ?? 'Buscar...',
-                          hintStyle: AppTextStyles.bodyM().copyWith(
+                          hintStyle: searchFieldTheme?.placeholderStyle ?? AppTextStyles.bodyM().copyWith(
                             color: AppColors.neutralDarkLightest,
                           ),
                           border: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          errorBorder: InputBorder.none,
+                          disabledBorder: InputBorder.none,
+                          focusedErrorBorder: InputBorder.none,
                           isDense: true,
                           contentPadding: EdgeInsets.zero,
                         ),
@@ -110,12 +143,7 @@ class SearchAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ],
       ),
-      titleTextStyle: AppTextStyles.heading4().copyWith(
-        color: AppColors.neutralDarkDarkest,
-      ),
-      backgroundColor: AppColors.neutralLightLightest,
-      surfaceTintColor: Colors.transparent,
-      elevation: 0,
+      automaticallyImplyLeading: false,
       actions: const [],
     );
   }

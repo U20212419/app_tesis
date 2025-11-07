@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
+import '../theme/info_card_theme.dart';
 import '../utils/size_config.dart';
 
 class InfoCard extends StatelessWidget {
@@ -20,13 +21,17 @@ class InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final InfoCardTheme? infoCardTheme = Theme.of(context).extension<InfoCardTheme>();
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(SizeConfig.scaleHeight(2.5)),
+      splashColor: Colors.transparent,
+      highlightColor: Colors.transparent,
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
-          color: AppColors.neutralLightLight,
+          color: infoCardTheme?.backgroundColor ?? AppColors.neutralLightLight,
           borderRadius: BorderRadius.circular(SizeConfig.scaleHeight(2.5)),
         ),
         child: Padding(
@@ -43,7 +48,7 @@ class InfoCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: AppTextStyles.heading4().copyWith(
+                      style: infoCardTheme?.titleStyle ?? AppTextStyles.heading4().copyWith(
                         color: AppColors.neutralDarkDarkest,
                       ),
                       softWrap: true,
@@ -53,7 +58,7 @@ class InfoCard extends StatelessWidget {
                         padding: EdgeInsets.only(top: SizeConfig.scaleHeight(0.6)),
                         child: Text(
                           subtitle!,
-                          style: AppTextStyles.bodyS().copyWith(
+                          style: infoCardTheme?.subtitleStyle ?? AppTextStyles.bodyS().copyWith(
                             color: AppColors.neutralDarkLight,
                           ),
                           softWrap: true,
@@ -69,7 +74,7 @@ class InfoCard extends StatelessWidget {
                     trailingIcon,
                     size: SizeConfig.scaleHeight(1.9),
                     fill: 1.0,
-                    color: AppColors.neutralDarkLightest,
+                    color: infoCardTheme?.iconColor ?? AppColors.neutralDarkLightest,
                   )
                 ),
             ],

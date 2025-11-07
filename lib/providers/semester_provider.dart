@@ -14,7 +14,7 @@ class SemesterProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-  // Fetch all semesters from the service
+  // Fetch all semesters
   Future<void> fetchSemesters() async {
     _isLoading = true;
     _error = null;
@@ -24,12 +24,14 @@ class SemesterProvider with ChangeNotifier {
       _semesters = await _semesterService.getSemesters();
     } catch (e) {
       _error = e.toString();
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
-
-    _isLoading = false;
-    notifyListeners();
   }
 
+  // Fetch all semesters with the amount of courses in each semester
   Future<void> fetchSemestersDetailed() async {
     _isLoading = true;
     _error = null;
@@ -39,20 +41,64 @@ class SemesterProvider with ChangeNotifier {
       _semesters = await _semesterService.getSemestersDetailed();
     } catch (e) {
       _error = e.toString();
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
-
-    _isLoading = false;
-    notifyListeners();
   }
 
-  Future<void> addSemester(int year, int number) async {
-    try {
-      // final newSemester = await _semesterService.createSemester(year, number);
-      // _semesters.add(newSemester);
+  // Add a new semester
+  Future<void> addSemester(String year, String number) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
 
-      await fetchSemesters();
+    try {
+      final newSemester = await _semesterService.createSemester(year, number);
+      _semesters.add(newSemester);
     } catch (e) {
-      _error = e.toString();
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Update an existing semester
+  Future<void> updateSemester(int id, String year, String number) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final updatedSemester = await _semesterService.updateSemester(
+          id, year, number);
+      final index = _semesters.indexWhere((semester) => semester.id == id);
+      if (index != -1) {
+        _semesters[index] = updatedSemester;
+      }
+    } catch (e) {
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Soft delete an existing semester
+  Future<void> deleteSemester(int id) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      await _semesterService.deleteSemester(id);
+      _semesters.removeWhere((semester) => semester.id == id);
+    } catch (e) {
+      rethrow;
+    } finally {
+      _isLoading = false;
       notifyListeners();
     }
   }

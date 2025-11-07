@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import '../utils/size_config.dart';
 
@@ -20,6 +19,14 @@ class BottomNavTabItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final TextStyle selectedTextStyle = AppTextStyles.actionS().copyWith(
+      color: theme.colorScheme.onSurface,
+    );
+    final TextStyle unselectedTextStyle = AppTextStyles.bodyXS().copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
+    );
+
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
@@ -33,21 +40,13 @@ class BottomNavTabItem extends StatelessWidget {
               icon,
               size: SizeConfig.scaleHeight(3.75),
               fill: 1.0,
-              color: isSelected
-                  ? AppColors.highlightDarkest
-                  : AppColors.neutralLightDark,
+              color: isSelected ? theme.primaryColor : theme.dividerColor,
             ),
             SizedBox(height: SizeConfig.scaleHeight(1)),
             Text(
               label,
               textAlign: TextAlign.center,
-              style: isSelected
-                  ? AppTextStyles.actionS().copyWith(
-                color: AppColors.neutralDarkDarkest,
-              )
-                  : AppTextStyles.bodyXS().copyWith(
-                color: AppColors.neutralDarkLight,
-              ),
+              style: isSelected ? selectedTextStyle : unselectedTextStyle,
             ),
           ],
         ),

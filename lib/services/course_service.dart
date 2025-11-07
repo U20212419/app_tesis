@@ -35,16 +35,6 @@ class CourseService {
     }
   }
 
-  // Get a specific course by ID
-  Future<Course> getCourse(int id) async {
-    try {
-      final response = await _apiService.client.get('/courses/$id');
-      return Course.fromJson(response.data);
-    } catch (e) {
-      throw Exception('Error fetching course $id: $e');
-    }
-  }
-
   // Get all courses including the amount of semesters in which each course is present
   Future<List<Course>> getCoursesDetailed() async {
     try {
@@ -74,43 +64,89 @@ class CourseService {
   }
 
   // Create a new course
-  Future<Course> createCourse(String name, String code) async {
+  Future<Course> createCourse(String code, String name) async {
     try {
+      final String? token = await GoogleSignInService.getIdToken();
+
+      if (token == null) {
+        throw Exception(
+            'Authentication token not found. User might be signed out.');
+      }
+
       final response = await _apiService.client.post(
         '/courses/',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
         data: {
-          'name': name,
           'code': code,
+          'name': name,
         },
       );
+
       return Course.fromJson(response.data);
+    } on DioException catch (e) {
+      throw Exception('Error creating course: ${e.message}');
     } catch (e) {
-      throw Exception('Error creating course: $e');
+      throw Exception('An unexpected error occurred: $e');
     }
   }
 
   // Update an existing course
-  Future<Course> updateCourse(int id, String name, String code) async {
+  Future<Course> updateCourse(int id, String code, String name) async {
     try {
+      final String? token = await GoogleSignInService.getIdToken();
+
+      if (token == null) {
+        throw Exception(
+            'Authentication token not found. User might be signed out.');
+      }
+
       final response = await _apiService.client.put(
         '/courses/$id',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
         data: {
-          'name': name,
           'code': code,
+          'name': name,
         },
       );
+
       return Course.fromJson(response.data);
+    } on DioException catch (e) {
+      throw Exception('Error editing course: ${e.message}');
     } catch (e) {
-      throw Exception('Error updating course $id: $e');
+      throw Exception('An unexpected error occurred: $e');
     }
   }
 
-  // Delete a course
+  // Soft delete a course
   Future<void> deleteCourse(int id) async {
     try {
-      await _apiService.client.delete('/courses/$id');
+      final String? token = await GoogleSignInService.getIdToken();
+
+      if (token == null) {
+        throw Exception(
+            'Authentication token not found. User might be signed out.');
+      }
+
+      await _apiService.client.delete(
+        '/courses/$id',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+    } on DioException catch (e) {
+      throw Exception('Error deleting course: ${e.message}');
     } catch (e) {
-      throw Exception('Error deleting course $id: $e');
+      throw Exception('An unexpected error occurred: $e');
     }
   }
 }

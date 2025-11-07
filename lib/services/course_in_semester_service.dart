@@ -2,13 +2,13 @@ import 'package:app_tesis/auth/google_sign_in_service.dart';
 import 'package:dio/dio.dart';
 
 import 'api_service.dart';
-import '../models/semester.dart';
+import '../models/course_in_semester.dart';
 
-class SemesterService {
+class CourseInSemesterService {
   final ApiService _apiService = ApiService();
 
-  // Get all semesters
-  Future<List<Semester>> getSemesters() async {
+  // Get all courses in all semesters
+  Future<List<CourseInSemester>> getCoursesInSemesters() async {
     try {
       final String? token = await GoogleSignInService.getIdToken();
 
@@ -18,7 +18,7 @@ class SemesterService {
       }
 
       final response = await _apiService.client.get(
-        '/semesters/',
+        '/courses-in-semester/',
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
@@ -27,16 +27,16 @@ class SemesterService {
       );
 
       final data = response.data as List;
-      return data.map((json) => Semester.fromJson(json)).toList();
+      return data.map((json) => CourseInSemester.fromJson(json)).toList();
     } on DioException catch (e) {
-      throw Exception('Error fetching semesters: ${e.message}');
+      throw Exception('Error fetching courses in semesters: ${e.message}');
     } catch (e) {
       throw Exception('An unexpected error occurred: $e');
     }
   }
 
-  // Get all semesters including the amount of courses that are present in each semester
-  Future<List<Semester>> getSemestersDetailed() async {
+  // Get all courses in a specific semester
+  Future<List<CourseInSemester>> getCoursesInSemester(int idSemester) async {
     try {
       final String? token = await GoogleSignInService.getIdToken();
 
@@ -46,7 +46,7 @@ class SemesterService {
       }
 
       final response = await _apiService.client.get(
-        '/semesters/detailed',
+        '/courses-in-semester/$idSemester',
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
@@ -55,16 +55,16 @@ class SemesterService {
       );
 
       final data = response.data as List;
-      return data.map((json) => Semester.fromJson(json)).toList();
+      return data.map((json) => CourseInSemester.fromJson(json)).toList();
     } on DioException catch (e) {
-      throw Exception('Error fetching semesters: ${e.message}');
+      throw Exception('Error fetching courses in the semester: ${e.message}');
     } catch (e) {
       throw Exception('An unexpected error occurred: $e');
     }
   }
 
-  // Create a new semester
-  Future<Semester> createSemester(String year, String number) async {
+  // Add a course to a semester
+  Future<CourseInSemester> addCourseToSemester(int idSemester, int idCourse) async {
     try {
       final String? token = await GoogleSignInService.getIdToken();
 
@@ -74,59 +74,24 @@ class SemesterService {
       }
 
       final response = await _apiService.client.post(
-        '/semesters/',
+        '/courses-in-semester/$idSemester/$idCourse',
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
           },
         ),
-        data: {
-          'year': year,
-          'number': number,
-        },
       );
 
-      return Semester.fromJson(response.data);
+      return CourseInSemester.fromJson(response.data);
     } on DioException catch (e) {
-      throw Exception('Error creating semester: ${e.message}');
+      throw Exception('Error adding course to the semester: ${e.message}');
     } catch (e) {
       throw Exception('An unexpected error occurred: $e');
     }
   }
 
-  // Update an existing semester
-  Future<Semester> updateSemester(int id, String year, String number) async {
-    try {
-      final String? token = await GoogleSignInService.getIdToken();
-
-      if (token == null) {
-        throw Exception(
-            'Authentication token not found. User might be signed out.');
-      }
-
-      final response = await _apiService.client.put(
-        '/semesters/$id',
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-          },
-        ),
-        data: {
-          'year': year,
-          'number': number,
-        },
-      );
-
-      return Semester.fromJson(response.data);
-    } on DioException catch (e) {
-      throw Exception('Error updating semester $id: ${e.message}');
-    } catch (e) {
-      throw Exception('An unexpected error occurred: $e');
-    }
-  }
-
-  // Soft delete a semester
-  Future<void> deleteSemester(int id) async {
+  // Remove a course from a semester
+  Future<void> removeCourseFromSemester(int idSemester, int idCourse) async {
     try {
       final String? token = await GoogleSignInService.getIdToken();
 
@@ -136,7 +101,7 @@ class SemesterService {
       }
 
       await _apiService.client.delete(
-        '/semesters/$id',
+        '/courses-in-semester/$idSemester/$idCourse',
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
@@ -144,7 +109,7 @@ class SemesterService {
         ),
       );
     } on DioException catch (e) {
-      throw Exception('Error deleting semester: ${e.message}');
+      throw Exception('Error removing course from the semester: ${e.message}');
     } catch (e) {
       throw Exception('An unexpected error occurred: $e');
     }

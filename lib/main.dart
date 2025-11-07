@@ -1,3 +1,4 @@
+import 'package:app_tesis/providers/course_in_semester_provider.dart';
 import 'package:app_tesis/providers/course_provider.dart';
 import 'package:app_tesis/providers/semester_provider.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,7 @@ Future<void> main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => CourseProvider()),
         ChangeNotifierProvider(create: (_) => SemesterProvider()),
+        ChangeNotifierProvider(create: (_) => CourseInSemesterProvider()),
       ],
       child: const MyApp(),
     ),

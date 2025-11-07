@@ -4,9 +4,9 @@ import 'package:material_symbols_icons/symbols.dart';
 
 import '../screens/main_screen.dart';
 import '../theme/app_colors.dart';
-import '../theme/app_text_styles.dart';
 import '../utils/size_config.dart';
 import '../widgets/action_button.dart';
+import '../widgets/custom_toast.dart';
 import 'google_sign_in_service.dart';
 
 class AuthGate extends StatefulWidget {
@@ -50,7 +50,7 @@ class _AuthGateState extends State<AuthGate> {
                   : ActionButton(
                 icon: Symbols.login_rounded,
                 label: 'Iniciar sesión con Google',
-                backgroundColor: AppColors.highlightDarkest,
+                accentColor: AppColors.highlightDarkest,
                 onTap: () async {
                   setState(() {
                     _isLoggingIn = true;
@@ -59,16 +59,12 @@ class _AuthGateState extends State<AuthGate> {
                     await GoogleSignInService.signInWithGoogle();
                   } catch (e) {
                     if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                              'Error al iniciar sesión: $e',
-                              style: AppTextStyles.bodyXS().copyWith(
-                                color: AppColors.neutralLightLightest,
-                              )
-                          ),
-                          backgroundColor: AppColors.supportErrorDark,
-                        ),
+                      CustomToast.show(
+                        context: context,
+                        title: 'Error al iniciar sesión',
+                        detail: e.toString().trim(),
+                        type: CustomToastType.error,
+                        position: ToastPosition.bottom,
                       );
                       setState(() {
                         _isLoggingIn = false;

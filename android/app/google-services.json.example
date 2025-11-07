@@ -42,7 +42,7 @@
               "client_id": "YOUR_OTHER_OAUTH_CLIENT_ID.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "pucp.edu.pe.appTesis"
+                "bundle_id": "com.example.yourBundleId"
               }
             }
           ]

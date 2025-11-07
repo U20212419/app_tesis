@@ -50,6 +50,10 @@ android {
         }
     }
 
+    tasks.withType<JavaCompile> {
+        options.compilerArgs.add("-Xlint:deprecation")
+    }
+
     buildTypes {
         getByName("release") {
             signingConfig = signingConfigs.getByName("release")

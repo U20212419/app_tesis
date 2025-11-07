@@ -1,14 +1,12 @@
-import 'package:app_tesis/screens/statistics_screen.dart';
-import 'package:app_tesis/screens/structuration_screen.dart';
+import 'package:app_tesis/screens/statistics/statistics_screen.dart';
+import 'package:app_tesis/screens/structuration/structuration_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
-import '../controllers/inherited_bottom_bar_controller.dart';
-import '../theme/app_colors.dart';
 import '../utils/size_config.dart';
 import '../widgets/app_divider.dart';
 import '../widgets/bottom_nav_tab_item.dart';
-import 'courses_screen.dart';
+import 'courses/courses_screen.dart';
 
 enum AppSection { courses, structuration, statistics }
 
@@ -40,10 +38,6 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-  void _updateBottomBarVisibility(bool visible) {
-    _showBottomBar.value = visible;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,10 +66,7 @@ class _MainScreenState extends State<MainScreen> {
       key: _navigatorKeys[section],
       onGenerateRoute: (settings) {
         return MaterialPageRoute(
-          builder: (context) => InheritedBottomBarController(
-            toggleBottomBar: _updateBottomBarVisibility,
-            child: screen,
-          ),
+          builder: (context) => screen,
         );
       },
     );
@@ -95,7 +86,6 @@ class _MainScreenState extends State<MainScreen> {
             SizeConfig.scaleWidth(4.4), // Right
             SizeConfig.scaleHeight(0), // Bottom
           ),
-          color: AppColors.neutralLightLightest,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,

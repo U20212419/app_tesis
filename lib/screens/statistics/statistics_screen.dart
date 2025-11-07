@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
-import '../theme/app_colors.dart';
-import '../theme/app_text_styles.dart';
-import '../utils/size_config.dart';
-import '../widgets/action_button.dart';
-import '../widgets/app_divider.dart';
-import '../widgets/secondary_bottom_bar.dart';
+import '../../theme/app_text_styles.dart';
+import '../../utils/size_config.dart';
+import '../../widgets/app_divider.dart';
 
 class StatisticsScreen extends StatelessWidget {
   const StatisticsScreen({super.key});
@@ -15,17 +12,14 @@ class StatisticsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     SizeConfig.init(context);
 
+    final theme = Theme.of(context);
+
     return Scaffold(
         body: Column(
             children: [
               AppBar(
                   title: const Text('Visualización de Estadísticas'),
                   centerTitle: true,
-                  titleTextStyle: AppTextStyles.heading4().copyWith(
-                    color: AppColors.neutralDarkDarkest,
-                  ),
-                  backgroundColor: AppColors.neutralLightLightest,
-                  elevation: 0,
               ),
               AppDivider(
                 thickness: SizeConfig.scaleHeight(0.08),
@@ -42,7 +36,7 @@ class StatisticsScreen extends StatelessWidget {
                         color: Colors.transparent,
                         borderRadius: BorderRadius.circular(SizeConfig.scaleHeight(1.9)),
                         border: Border.all(
-                          color: AppColors.highlightDarkest,
+                          color: theme.primaryColor,
                           width: SizeConfig.scaleHeight(0.23),
                           strokeAlign: BorderSide.strokeAlignInside,
                         )
@@ -56,13 +50,13 @@ class StatisticsScreen extends StatelessWidget {
                             Symbols.add_2_rounded,
                             size: SizeConfig.scaleHeight(3.2),
                             fill: 1.0,
-                            color: AppColors.highlightDarkest,
+                            color: theme.primaryColor,
                           ),
                           Text(
                             "Añadir Evaluación",
                             textAlign: TextAlign.center,
                             style: AppTextStyles.actionM().copyWith(
-                              color: AppColors.highlightDarkest,
+                              color: theme.primaryColor,
                             ),
                           ),
                         ],

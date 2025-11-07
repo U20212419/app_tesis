@@ -14,7 +14,7 @@ class CourseProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-  // Fetch all courses from the service
+  // Fetch all courses
   Future<void> fetchCourses() async {
     _isLoading = true;
     _error = null;
@@ -24,12 +24,14 @@ class CourseProvider with ChangeNotifier {
       _courses = await _courseService.getCourses();
     } catch (e) {
       _error = e.toString();
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
-
-    _isLoading = false;
-    notifyListeners();
   }
 
+  // Fetch all courses with the amount of semesters in which each course is present
   Future<void> fetchCoursesDetailed() async {
     _isLoading = true;
     _error = null;
@@ -39,20 +41,63 @@ class CourseProvider with ChangeNotifier {
       _courses = await _courseService.getCoursesDetailed();
     } catch (e) {
       _error = e.toString();
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
-
-    _isLoading = false;
-    notifyListeners();
   }
 
-  Future<void> addCourse(String courseName) async {
-    try {
-      // final newCourse = await _courseService.createCourse(courseName);
-      // _courses.add(newCourse);
+  // Add a new course
+  Future<void> addCourse(String code, String name) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
 
-      await fetchCourses();
+    try {
+      final newCourse = await _courseService.createCourse(code, name);
+      _courses.add(newCourse);
     } catch (e) {
-      _error = e.toString();
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Update an existing course
+  Future<void> updateCourse(int id, String code, String name) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final updatedCourse = await _courseService.updateCourse(id, code, name);
+      final index = _courses.indexWhere((course) => course.id == id);
+      if (index != -1) {
+        _courses[index] = updatedCourse;
+      }
+    } catch (e) {
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Soft delete an existing course
+  Future<void> deleteCourse(int id) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      await _courseService.deleteCourse(id);
+      _courses.removeWhere((course) => course.id == id);
+    } catch (e) {
+      rethrow;
+    } finally {
+      _isLoading = false;
       notifyListeners();
     }
   }
