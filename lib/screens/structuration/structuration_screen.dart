@@ -114,13 +114,13 @@ class _StructurationScreenState extends State<StructurationScreen> {
         _isNavigatingToModeAction = true;
       });
 
-      await Navigator.of(context, rootNavigator: true).push(
-        MaterialPageRoute(
-          builder: (context) => CoursesInSemesterScreen(
-            semesterId: semesterId,
-            semesterName: semesterName,
-          ),
-        ),
+      await Navigator.pushNamed(
+        context,
+        '/coursesInSemester',
+        arguments: {
+          'semesterId': semesterId,
+          'semesterName': semesterName,
+        },
       );
 
       if (mounted) {

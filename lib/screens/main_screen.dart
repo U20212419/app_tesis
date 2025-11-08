@@ -1,4 +1,5 @@
 import 'package:app_tesis/screens/statistics/statistics_screen.dart';
+import 'package:app_tesis/screens/structuration/courses/courses_in_semester_screen.dart';
 import 'package:app_tesis/screens/structuration/structuration_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -65,8 +66,24 @@ class _MainScreenState extends State<MainScreen> {
     return Navigator(
       key: _navigatorKeys[section],
       onGenerateRoute: (settings) {
-        return MaterialPageRoute(
-          builder: (context) => screen,
+        WidgetBuilder builder;
+        switch (settings.name) {
+          case '/coursesInSemester':
+            final args = settings.arguments as Map<String, dynamic>;
+            builder = (BuildContext context) => CoursesInSemesterScreen(
+                semesterId: args['semesterId'],
+                semesterName: args['semesterName'],
+            );
+            break;
+          case '/':
+          default:
+            builder = (BuildContext context) => screen;
+        }
+        return PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => builder(context),
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
+          settings: settings,
         );
       },
     );

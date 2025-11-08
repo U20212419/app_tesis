@@ -14,6 +14,12 @@ class CourseInSemesterProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
+  void clearCoursesInSemesterList() {
+    _coursesInSemester = [];
+    _isLoading = true;
+    _error = null;
+  }
+
   // Fetch all courses in all semesters
   Future<void> fetchCoursesInSemesters() async {
     _isLoading = true;

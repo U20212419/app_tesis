@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:app_tesis/providers/course_provider.dart';
-import 'package:app_tesis/screens/main_screen.dart';
 import 'package:diacritic/diacritic.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -47,6 +46,8 @@ class _CoursesInSemesterScreenState extends State<CoursesInSemesterScreen> {
   ActiveMode _activeMode = ActiveMode.none;
   late Color _modeColor;
 
+  late CourseInSemesterProvider _courseInSemesterProvider;
+
   bool _isNavigatingToModeAction = false;
   bool _isInit = true;
   late int _semesterId;
@@ -58,11 +59,15 @@ class _CoursesInSemesterScreenState extends State<CoursesInSemesterScreen> {
     _semesterId = widget.semesterId;
     _semesterName = widget.semesterName;
 
-    // Fetch courses when the widget is first built
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<CourseInSemesterProvider>(context, listen: false).fetchCoursesInSemester(_semesterId);
+      if (mounted) {
+        // Fetch courses in the semester when the widget is first built
+        _courseInSemesterProvider.fetchCoursesInSemester(_semesterId);
 
-      Provider.of<CourseProvider>(context, listen: false).fetchCourses();
+        // Fetch all courses
+        Provider.of<CourseProvider>(context, listen: false)
+            .fetchCourses();
+      }
     });
 
     // Initialize search controller listener to filter courses in real-time
@@ -78,6 +83,7 @@ class _CoursesInSemesterScreenState extends State<CoursesInSemesterScreen> {
     super.didChangeDependencies();
     if (_isInit) {
       _modeColor = Theme.of(context).colorScheme.onSurface;
+      _courseInSemesterProvider = Provider.of<CourseInSemesterProvider>(context, listen: false);
       _isInit = false;
     }
   }
@@ -86,6 +92,7 @@ class _CoursesInSemesterScreenState extends State<CoursesInSemesterScreen> {
   void dispose() {
     _searchController.dispose();
     _focusNode.dispose();
+    _courseInSemesterProvider.clearCoursesInSemesterList();
     super.dispose();
   }
 
@@ -240,155 +247,152 @@ class _CoursesInSemesterScreenState extends State<CoursesInSemesterScreen> {
       },
       child: Consumer<CourseInSemesterProvider>(
         builder: (context, courseInSemesterProvider, child) {
-          return Scaffold(
-            resizeToAvoidBottomInset: false,
-            appBar: SearchAppBar(
-              title: _semesterName,
-              isSearching: _isSearching,
-              searchController: _searchController,
-              onSearchIconPressed: _toggleSearch,
-              onBackIconPressed: () {
-                Navigator.pop(context);
-              },
-              focusNode: _focusNode,
-              hintText: 'Buscar curso',
-            ),
-            body: Column(
-              children: [
-                AppDivider(
-                  thickness: SizeConfig.scaleHeight(0.08),
-                ),
-                Expanded(
-                  child: _buildCourseList(context, courseInSemesterProvider, _searchQuery),
-                ),
-                SecondaryBottomBar(
-                  isModeActive: _activeMode != ActiveMode.none,
-                  modeTitle: modeData['title'],
-                  modeSubtitle: modeData['subtitle'],
-                  modeTitleColor: _modeColor,
-                  onCancelMode: () => _toggleMode(ActiveMode.none, Colors.transparent),
-                  actions: [
-                    ActionButton(
-                      icon: Symbols.add_2_rounded,
-                      label: 'Añadir',
-                      accentColor: AppColors.highlightDarkest,
-                      onTap: () {
-                        final coursesAlreadyInSemester = Set<int>.from(
-                          courseInSemesterProvider.courseInSemester
-                              .map((cis) => cis.course.id)
-                        );
+          return Column(
+            children: [
+              SearchAppBar(
+                title: _semesterName,
+                isSearching: _isSearching,
+                searchController: _searchController,
+                onSearchIconPressed: _toggleSearch,
+                onBackIconPressed: () {
+                  Navigator.pop(context);
+                },
+                focusNode: _focusNode,
+                hintText: 'Buscar curso',
+              ),
+              AppDivider(
+                thickness: SizeConfig.scaleHeight(0.08),
+              ),
+              Expanded(
+                child: _buildCourseList(context, courseInSemesterProvider, _searchQuery),
+              ),
+              SecondaryBottomBar(
+                isModeActive: _activeMode != ActiveMode.none,
+                modeTitle: modeData['title'],
+                modeSubtitle: modeData['subtitle'],
+                modeTitleColor: _modeColor,
+                onCancelMode: () => _toggleMode(ActiveMode.none, Colors.transparent),
+                actions: [
+                  ActionButton(
+                    icon: Symbols.add_2_rounded,
+                    label: 'Añadir',
+                    accentColor: AppColors.highlightDarkest,
+                    onTap: () {
+                      final coursesAlreadyInSemester = Set<int>.from(
+                        courseInSemesterProvider.courseInSemester
+                            .map((cis) => cis.course.id)
+                      );
 
-                        final availableCourses = courseProvider.courses
-                            .where((course) =>
-                                !coursesAlreadyInSemester.contains(course.id))
-                            .toList();
+                      final availableCourses = courseProvider.courses
+                          .where((course) =>
+                              !coursesAlreadyInSemester.contains(course.id))
+                          .toList();
 
-                        if (availableCourses.isEmpty) {
-                          CustomToast.show(
-                            context: context,
-                            title: 'No hay cursos disponibles',
-                            detail: 'No hay más cursos para añadir a este semestre. Intente crear un curso nuevo.',
-                            type: CustomToastType.warning,
-                            position: ToastPosition.top,
-                          );
-                          return;
-                        }
-
-                        final formKey = GlobalKey<FormState>();
-                        int? selectedCourseId;
-
-                        // Show dialog to select and add a course
-                        showCustomDialog(
+                      if (availableCourses.isEmpty) {
+                        CustomToast.show(
                           context: context,
-                          title: 'Añadir Curso',
-                          color: AppColors.highlightDarkest,
-                          actionButtonText: "Añadir",
-                          body: StatefulBuilder(
-                            builder: (context, setState) {
-                              final theme = Theme.of(context);
-                              final CustomTextFieldTheme? customTextFieldTheme =
-                                theme.extension<CustomTextFieldTheme>();
+                          title: 'No hay cursos disponibles',
+                          detail: 'No hay más cursos para añadir a este semestre. Intente crear un nuevo curso.',
+                          type: CustomToastType.warning,
+                          position: ToastPosition.top,
+                        );
+                        return;
+                      }
 
-                              return Form(
-                                key: formKey,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    SizedBox(height: SizeConfig.scaleHeight(1.25)),
-                                    Theme(
-                                      data: Theme.of(context).copyWith(
-                                        splashColor: theme.colorScheme.primary,
-                                        highlightColor: theme.colorScheme.primary,
-                                      ),
-                                      child: DropdownButtonFormField<int>(
-                                        initialValue: selectedCourseId,
-                                        hint: Text(
-                                          'Seleccione un curso',
-                                          style: AppTextStyles.bodyXS().copyWith(
-                                            color: theme.inputDecorationTheme.hintStyle?.color ??
-                                                AppColors.neutralDarkLightest,
-                                          ),
-                                        ),
-                                        icon: Icon(
-                                          Symbols.expand_more_rounded,
-                                          size: SizeConfig.scaleHeight(3.1),
+                      final formKey = GlobalKey<FormState>();
+                      int? selectedCourseId;
+
+                      // Show dialog to select and add a course
+                      showCustomDialog(
+                        context: context,
+                        title: 'Añadir Curso',
+                        color: AppColors.highlightDarkest,
+                        actionButtonText: "Añadir",
+                        body: StatefulBuilder(
+                          builder: (context, setState) {
+                            final theme = Theme.of(context);
+                            final CustomTextFieldTheme? customTextFieldTheme =
+                              theme.extension<CustomTextFieldTheme>();
+
+                            return Form(
+                              key: formKey,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(height: SizeConfig.scaleHeight(1.25)),
+                                  Theme(
+                                    data: Theme.of(context).copyWith(
+                                      splashColor: theme.colorScheme.primary,
+                                      highlightColor: theme.colorScheme.primary,
+                                    ),
+                                    child: DropdownButtonFormField<int>(
+                                      initialValue: selectedCourseId,
+                                      hint: Text(
+                                        'Seleccione un curso',
+                                        style: AppTextStyles.bodyXS().copyWith(
                                           color: theme.inputDecorationTheme.hintStyle?.color ??
                                               AppColors.neutralDarkLightest,
                                         ),
-                                        dropdownColor: theme.colorScheme.surface,
-                                        elevation: 2,
-                                        isExpanded: true,
-                                        decoration: const InputDecoration(
-                                        ),
-                                        items: availableCourses.map((Course course) {
-                                          return DropdownMenuItem<int>(
-                                            value: course.id,
-                                            child: Text('${course.code} - ${course.name}'),
-                                          );
-                                        }).toList(),
-                                        onChanged: (int? newValue) {
-                                          setState(() {
-                                            selectedCourseId = newValue;
-                                          });
-                                        },
-                                        validator: (value) {
-                                          if (value == null) {
-                                            return 'Por favor, seleccione un curso.';
-                                          }
-                                          return null;
-                                        },
-                                        autovalidateMode: AutovalidateMode.onUserInteraction,
-                                        style: customTextFieldTheme?.inputTextStyle ?? AppTextStyles.bodyM().copyWith(
-                                          color: AppColors.neutralDarkDarkest,
-                                        ),
+                                      ),
+                                      icon: Icon(
+                                        Symbols.expand_more_rounded,
+                                        size: SizeConfig.scaleHeight(3.1),
+                                        color: theme.inputDecorationTheme.hintStyle?.color ??
+                                            AppColors.neutralDarkLightest,
+                                      ),
+                                      dropdownColor: theme.colorScheme.surface,
+                                      elevation: 2,
+                                      isExpanded: true,
+                                      decoration: const InputDecoration(
+                                      ),
+                                      items: availableCourses.map((Course course) {
+                                        return DropdownMenuItem<int>(
+                                          value: course.id,
+                                          child: Text('${course.code} - ${course.name}'),
+                                        );
+                                      }).toList(),
+                                      onChanged: (int? newValue) {
+                                        setState(() {
+                                          selectedCourseId = newValue;
+                                        });
+                                      },
+                                      validator: (value) {
+                                        if (value == null) {
+                                          return 'Por favor, seleccione un curso.';
+                                        }
+                                        return null;
+                                      },
+                                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                                      style: customTextFieldTheme?.inputTextStyle ?? AppTextStyles.bodyM().copyWith(
+                                        color: AppColors.neutralDarkDarkest,
                                       ),
                                     ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                          onActionPressed: () {
-                            if (formKey.currentState!.validate()) {
-                              _addCourse(courseInSemesterProvider,
-                                  selectedCourseId);
-                            }
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                        onActionPressed: () {
+                          if (formKey.currentState!.validate()) {
+                            _addCourse(courseInSemesterProvider,
+                                selectedCourseId);
                           }
-                        );
-                      }
-                    ),
-                    ActionButton(
-                      icon: Symbols.playlist_remove_rounded,
-                      label: 'Quitar',
-                      accentColor: AppColors.supportWarningDark,
-                      onTap: () {
-                        _toggleMode(ActiveMode.remove, AppColors.supportWarningDark);
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                        }
+                      );
+                    }
+                  ),
+                  ActionButton(
+                    icon: Symbols.playlist_remove_rounded,
+                    label: 'Quitar',
+                    accentColor: AppColors.supportWarningDark,
+                    onTap: () {
+                      _toggleMode(ActiveMode.remove, AppColors.supportWarningDark);
+                    },
+                  ),
+                ],
+              ),
+            ],
           );
         },
       ),
