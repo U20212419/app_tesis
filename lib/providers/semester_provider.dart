@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 
 import '../models/semester.dart';
@@ -28,6 +30,17 @@ class SemesterProvider with ChangeNotifier {
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  // Update the course count when a course is added or removed from a semester
+  void updateCourseCount(int semesterId, int newCount) {
+    try {
+      final semester = _semesters.firstWhere((sem) => sem.id == semesterId);
+      semester.courseCount = newCount;
+      notifyListeners();
+    } catch (e) {
+      log('Error updating course count: $e');
     }
   }
 

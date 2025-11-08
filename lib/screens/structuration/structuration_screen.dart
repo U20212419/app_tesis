@@ -19,7 +19,6 @@ import '../../widgets/custom_toast.dart';
 import '../../widgets/info_card.dart';
 import '../../widgets/search_app_bar.dart';
 import '../../widgets/secondary_bottom_bar.dart';
-import 'courses/courses_in_semester_screen.dart';
 
 enum ActiveMode { none, edit, delete }
 
@@ -188,6 +187,7 @@ class _StructurationScreenState extends State<StructurationScreen> {
         ),
         onActionPressed: () {
           _deleteSemester(semesterProvider, semesterId);
+          return true;
         },
       );
 

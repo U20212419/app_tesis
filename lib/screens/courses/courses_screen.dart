@@ -169,6 +169,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
         ),
         onActionPressed: () {
           _deleteCourse(courseProvider, courseId);
+          return true;
         },
       );
 

@@ -1,3 +1,5 @@
+import 'package:app_tesis/providers/course_provider.dart';
+import 'package:app_tesis/providers/semester_provider.dart';
 import 'package:flutter/material.dart';
 
 import '../models/course_in_semester.dart';
@@ -55,7 +57,12 @@ class CourseInSemesterProvider with ChangeNotifier {
   }
 
   // Add a course to a semester
-  Future<void> addCourseToSemester(int idSemester, int idCourse) async {
+  Future<void> addCourseToSemester(
+      int idSemester,
+      int idCourse,
+      SemesterProvider semesterProvider,
+      CourseProvider courseProvider
+  ) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -63,6 +70,8 @@ class CourseInSemesterProvider with ChangeNotifier {
     try {
       final newCourseInSemester = await _courseInSemesterService.addCourseToSemester(idSemester, idCourse);
       _coursesInSemester.add(newCourseInSemester);
+      semesterProvider.updateCourseCount(idSemester, _coursesInSemester.length);
+      courseProvider.updateSemesterCount(idCourse, 1);
     } catch (e) {
       rethrow;
     } finally {
@@ -72,7 +81,12 @@ class CourseInSemesterProvider with ChangeNotifier {
   }
 
   // Remove a course from a semester
-  Future<void> removeCourseFromSemester(int idSemester, int idCourse) async {
+  Future<void> removeCourseFromSemester(
+      int idSemester,
+      int idCourse,
+      SemesterProvider semesterProvider,
+      CourseProvider courseProvider
+  ) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -80,6 +94,8 @@ class CourseInSemesterProvider with ChangeNotifier {
     try {
       await _courseInSemesterService.removeCourseFromSemester(idSemester, idCourse);
       _coursesInSemester.removeWhere((cis) => cis.idSemester == idSemester && cis.course.id == idCourse);
+      semesterProvider.updateCourseCount(idSemester, _coursesInSemester.length);
+      courseProvider.updateSemesterCount(idCourse, -1);
     } catch (e) {
       rethrow;
     } finally {

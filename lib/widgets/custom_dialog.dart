@@ -10,7 +10,7 @@ Future<T?> showCustomDialog<T>({
   required String title,
   required Widget body,
   required String actionButtonText,
-  required VoidCallback onActionPressed,
+  required bool Function() onActionPressed,
   required Color color,
   String cancelButtonText = 'Cancelar',
 }) {
@@ -66,7 +66,7 @@ class _CustomDialogView extends StatefulWidget {
   final String title;
   final Widget body;
   final String actionButtonText;
-  final VoidCallback onActionPressed;
+  final bool Function() onActionPressed;
   final Color color;
   final String cancelButtonText;
 
@@ -128,8 +128,11 @@ class _CustomDialogViewState extends State<_CustomDialogView> {
                     label: widget.actionButtonText,
                     accentColor: widget.color,
                     onTap: () {
-                      widget.onActionPressed();
-                      Navigator.of(context).pop();
+                      final bool wasSuccessful = widget.onActionPressed();
+
+                      if (wasSuccessful) {
+                        Navigator.of(context).pop();
+                      }
                     },
                     layout: ButtonLayout.horizontal,
                     width: SizeConfig.scaleWidth(36),

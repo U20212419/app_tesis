@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 
 import '../models/course.dart';
@@ -13,6 +15,17 @@ class CourseProvider with ChangeNotifier {
   List<Course> get courses => _courses;
   bool get isLoading => _isLoading;
   String? get error => _error;
+
+  // Update the semester count when a course is added or removed from a semester
+  void updateSemesterCount(int courseId, int counter) {
+    try {
+      final course = _courses.firstWhere((c) => c.id == courseId);
+      course.semesterCount = (course.semesterCount ?? 0) + counter;
+      notifyListeners();
+    } catch (e) {
+      log('Error updating semester count: $e');
+    }
+  }
 
   // Fetch all courses
   Future<void> fetchCourses() async {

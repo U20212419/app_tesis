@@ -9,6 +9,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../../models/course.dart';
 import '../../../providers/course_in_semester_provider.dart';
+import '../../../providers/semester_provider.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/app_text_styles.dart';
 import '../../../theme/custom_text_field_theme.dart';
@@ -63,10 +64,6 @@ class _CoursesInSemesterScreenState extends State<CoursesInSemesterScreen> {
       if (mounted) {
         // Fetch courses in the semester when the widget is first built
         _courseInSemesterProvider.fetchCoursesInSemester(_semesterId);
-
-        // Fetch all courses
-        Provider.of<CourseProvider>(context, listen: false)
-            .fetchCourses();
       }
     });
 
@@ -172,6 +169,7 @@ class _CoursesInSemesterScreenState extends State<CoursesInSemesterScreen> {
         ),
         onActionPressed: () {
           _removeCourse(courseInSemesterProvider, courseId);
+          return true;
         },
       );
 
@@ -184,8 +182,16 @@ class _CoursesInSemesterScreenState extends State<CoursesInSemesterScreen> {
   }
 
   void _removeCourse(CourseInSemesterProvider provider, int courseId) async {
+    final semesterProvider = Provider.of<SemesterProvider>(context, listen: false);
+    final courseProvider = Provider.of<CourseProvider>(context, listen: false);
+
     try {
-      await provider.removeCourseFromSemester(_semesterId, courseId);
+      await provider.removeCourseFromSemester(
+          _semesterId,
+          courseId,
+          semesterProvider,
+          courseProvider
+      );
 
       if (mounted) {
         CustomToast.show(
@@ -212,7 +218,15 @@ class _CoursesInSemesterScreenState extends State<CoursesInSemesterScreen> {
   void _addCourse(CourseInSemesterProvider provider, int? courseId) {
     if (courseId == null) return;
 
-    provider.addCourseToSemester(_semesterId, courseId);
+    final semesterProvider = Provider.of<SemesterProvider>(context, listen: false);
+    final courseProvider = Provider.of<CourseProvider>(context, listen: false);
+
+    provider.addCourseToSemester(
+        _semesterId,
+        courseId,
+        semesterProvider,
+        courseProvider
+    );
   }
 
   Map<String, String> _getModeData() {
@@ -377,7 +391,9 @@ class _CoursesInSemesterScreenState extends State<CoursesInSemesterScreen> {
                           if (formKey.currentState!.validate()) {
                             _addCourse(courseInSemesterProvider,
                                 selectedCourseId);
+                            return true;
                           }
+                          return false;
                         }
                       );
                     }

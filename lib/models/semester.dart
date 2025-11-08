@@ -2,7 +2,7 @@ class Semester {
   final int id;
   final int year;
   final int number;
-  final int? courseCount;
+  int? courseCount;
 
   Semester({
     required this.id,
