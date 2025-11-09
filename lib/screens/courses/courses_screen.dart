@@ -48,7 +48,20 @@ class _CoursesScreenState extends State<CoursesScreen> {
 
     // Fetch courses when the widget is first built
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<CourseProvider>(context, listen: false).fetchCoursesDetailed();
+      try {
+        Provider
+            .of<CourseProvider>(context, listen: false)
+            .fetchCoursesDetailed();
+      } catch (e) {
+        final errorMessage = e.toString().replaceFirst("Exception: ", "");
+        CustomToast.show(
+          context: context,
+          title: 'Error al cargar los cursos',
+          detail: errorMessage,
+          type: CustomToastType.error,
+          position: ToastPosition.top,
+        );
+      }
     });
 
     // Initialize search controller listener to filter courses in real-time
@@ -196,10 +209,11 @@ class _CoursesScreenState extends State<CoursesScreen> {
       }
     } catch (e) {
       if (mounted) {
+        final errorMessage = e.toString().replaceFirst("Exception: ", "");
         CustomToast.show(
           context: context,
           title: 'Error al eliminar el curso',
-          detail: e.toString().trim(),
+          detail: errorMessage,
           type: CustomToastType.error,
           position: ToastPosition.top,
         );
@@ -313,9 +327,6 @@ class _CoursesScreenState extends State<CoursesScreen> {
             color: AppColors.highlightDarkest,
           )
       );
-    }
-    if (provider.error != null) {
-      return Center(child: Text('Error: ${provider.error}'));
     }
 
     String normalizeString(String input) {

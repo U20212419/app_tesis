@@ -7,6 +7,7 @@ import '../../providers/semester_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_text_styles.dart';
 import '../../theme/custom_text_field_theme.dart';
+import '../../utils/error_handler.dart';
 import '../../utils/size_config.dart';
 import '../../widgets/base_form_screen.dart';
 import '../../widgets/custom_text_field.dart';
@@ -60,10 +61,11 @@ class _CreateSemesterScreenState extends State<CreateSemesterScreen> {
         }
       } catch (e) {
         if (mounted) {
+          final errorMessage = e.toString().replaceFirst("Exception: ", "");
           CustomToast.show(
             context: context,
             title: 'Error al crear el semestre',
-            detail: e.toString().trim(),
+            detail: errorMessage,
             type: CustomToastType.error,
             position: ToastPosition.top,
           );

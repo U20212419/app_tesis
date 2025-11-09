@@ -4,6 +4,7 @@ import 'package:material_symbols_icons/symbols.dart';
 
 import '../screens/main_screen.dart';
 import '../theme/app_colors.dart';
+import '../utils/error_handler.dart';
 import '../utils/size_config.dart';
 import '../widgets/action_button.dart';
 import '../widgets/custom_toast.dart';
@@ -59,10 +60,11 @@ class _AuthGateState extends State<AuthGate> {
                     await GoogleSignInService.signInWithGoogle();
                   } catch (e) {
                     if (context.mounted) {
+                      final errorMessage = ErrorHandler.getLoginErrorMessage(e);
                       CustomToast.show(
                         context: context,
                         title: 'Error al iniciar sesión',
-                        detail: e.toString().trim(),
+                        detail: errorMessage,
                         type: CustomToastType.error,
                         position: ToastPosition.bottom,
                       );

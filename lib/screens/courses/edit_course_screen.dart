@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../models/course.dart';
 import '../../providers/course_provider.dart';
+import '../../utils/error_handler.dart';
 import '../../utils/size_config.dart';
 import '../../widgets/base_form_screen.dart';
 import '../../widgets/custom_text_field.dart';
@@ -102,10 +103,11 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
         }
       } catch (e) {
         if (mounted) {
+          final errorMessage = e.toString().replaceFirst("Exception: ", "");
           CustomToast.show(
             context: context,
             title: 'Error al editar el curso',
-            detail: e.toString().trim(),
+            detail: errorMessage,
             type: CustomToastType.error,
             position: ToastPosition.top,
           );

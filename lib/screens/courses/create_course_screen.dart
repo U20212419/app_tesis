@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/course_provider.dart';
+import '../../utils/error_handler.dart';
 import '../../utils/size_config.dart';
 import '../../widgets/base_form_screen.dart';
 import '../../widgets/custom_text_field.dart';
@@ -56,10 +57,11 @@ class _CreateCourseScreenState extends State<CreateCourseScreen> {
         }
       } catch (e) {
         if (mounted) {
+          final errorMessage = e.toString().replaceFirst("Exception: ", "");
           CustomToast.show(
             context: context,
             title: 'Error al crear el curso',
-            detail: e.toString().trim(),
+            detail: errorMessage,
             type: CustomToastType.error,
             position: ToastPosition.top,
           );

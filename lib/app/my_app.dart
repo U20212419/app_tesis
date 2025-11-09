@@ -1,3 +1,4 @@
+import 'package:app_tesis/services/navigation_service.dart';
 import 'package:app_tesis/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
@@ -15,6 +16,7 @@ class MyApp extends StatelessWidget {
 
         return MaterialApp(
           title: 'App Tesis',
+          navigatorKey: NavigationService.navigatorKey,
           debugShowCheckedModeBanner: false,
           theme: AppTheme.lightTheme(context),
           darkTheme: AppTheme.darkTheme(context),

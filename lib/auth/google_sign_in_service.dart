@@ -32,7 +32,7 @@ class GoogleSignInService {
           ['email'],
         );
         if (authorization2?.accessToken == null) {
-          throw FirebaseAuthException(code: "error", message: "error");
+          throw Exception("No se pudo obtener el token de acceso.");
         }
         authorization = authorization2;
       }

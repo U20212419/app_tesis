@@ -60,10 +60,21 @@ class _CoursesInSemesterScreenState extends State<CoursesInSemesterScreen> {
     _semesterId = widget.semesterId;
     _semesterName = widget.semesterName;
 
+    // Fetch courses in the semester when the widget is first built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        // Fetch courses in the semester when the widget is first built
-        _courseInSemesterProvider.fetchCoursesInSemester(_semesterId);
+        try {
+          _courseInSemesterProvider.fetchCoursesInSemester(_semesterId);
+        } catch (e) {
+          final errorMessage = e.toString().replaceFirst("Exception: ", "");
+          CustomToast.show(
+            context: context,
+            title: 'Error al cargar los cursos en el semestre.',
+            detail: errorMessage,
+            type: CustomToastType.error,
+            position: ToastPosition.top,
+          );
+        }
       }
     });
 
@@ -204,10 +215,11 @@ class _CoursesInSemesterScreenState extends State<CoursesInSemesterScreen> {
       }
     } catch (e) {
       if (mounted) {
+        final errorMessage = e.toString().replaceFirst("Exception: ", "");
         CustomToast.show(
           context: context,
           title: 'Error al quitar el curso',
-          detail: e.toString().trim(),
+          detail: errorMessage,
           type: CustomToastType.error,
           position: ToastPosition.top,
         );
@@ -422,9 +434,6 @@ class _CoursesInSemesterScreenState extends State<CoursesInSemesterScreen> {
             color: AppColors.highlightDarkest,
           )
       );
-    }
-    if (provider.error != null) {
-      return Center(child: Text('Error: ${provider.error}'));
     }
 
     String normalizeString(String input) {

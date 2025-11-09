@@ -47,7 +47,20 @@ class _StructurationScreenState extends State<StructurationScreen> {
 
     // Fetch semesters when the widget is first built
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<SemesterProvider>(context, listen: false).fetchSemestersDetailed();
+      try {
+        Provider
+            .of<SemesterProvider>(context, listen: false)
+            .fetchSemestersDetailed();
+      } catch (e) {
+        final errorMessage = e.toString().replaceFirst("Exception: ", "");
+        CustomToast.show(
+          context: context,
+          title: 'Error al cargar los semestres',
+          detail: errorMessage,
+          type: CustomToastType.error,
+          position: ToastPosition.top,
+        );
+      }
     });
 
     // Initialize search controller listener to filter semesters in real-time
@@ -214,10 +227,11 @@ class _StructurationScreenState extends State<StructurationScreen> {
       }
     } catch (e) {
       if (mounted) {
+        final errorMessage = e.toString().replaceFirst("Exception: ", "");
         CustomToast.show(
           context: context,
           title: 'Error al eliminar el semestre',
-          detail: e.toString().trim(),
+          detail: errorMessage,
           type: CustomToastType.error,
           position: ToastPosition.top,
         );
@@ -331,9 +345,6 @@ class _StructurationScreenState extends State<StructurationScreen> {
             color: AppColors.highlightDarkest,
           )
       );
-    }
-    if (provider.error != null) {
-      return Center(child: Text('Error: ${provider.error}'));
     }
 
     final allSemesters = provider.semesters;
