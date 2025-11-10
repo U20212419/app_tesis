@@ -7,7 +7,6 @@ import '../../providers/semester_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_text_styles.dart';
 import '../../theme/custom_text_field_theme.dart';
-import '../../utils/error_handler.dart';
 import '../../utils/size_config.dart';
 import '../../widgets/base_form_screen.dart';
 import '../../widgets/custom_text_field.dart';
@@ -153,6 +152,7 @@ class _CreateSemesterScreenState extends State<CreateSemesterScreen> {
                   elevation: 2,
                   isExpanded: true,
                   decoration: const InputDecoration(
+                    errorMaxLines: 2,
                   ),
                   items: ['0', '1', '2'].map((String value) {
                     return DropdownMenuItem<String>(

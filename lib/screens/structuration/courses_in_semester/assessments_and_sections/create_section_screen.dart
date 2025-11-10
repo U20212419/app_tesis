@@ -1,22 +1,29 @@
-import 'package:app_tesis/widgets/custom_toast.dart';
+import 'package:app_tesis/providers/course_in_semester_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../providers/course_provider.dart';
-import '../../utils/size_config.dart';
-import '../../widgets/base_form_screen.dart';
-import '../../widgets/custom_text_field.dart';
+import '../../../../providers/section_provider.dart';
+import '../../../../utils/size_config.dart';
+import '../../../../widgets/base_form_screen.dart';
+import '../../../../widgets/custom_text_field.dart';
+import '../../../../widgets/custom_toast.dart';
 
-class CreateCourseScreen extends StatefulWidget {
-  const CreateCourseScreen({super.key});
+class CreateSectionScreen extends StatefulWidget {
+  final int semesterId;
+  final int courseId;
+
+  const CreateSectionScreen({
+    super.key,
+    required this.semesterId,
+    required this.courseId,
+  });
 
   @override
-  State<CreateCourseScreen> createState() => _CreateCourseScreenState();
+  State<CreateSectionScreen> createState() => _CreateSectionScreenState();
 }
 
-class _CreateCourseScreenState extends State<CreateCourseScreen> {
+class _CreateSectionScreenState extends State<CreateSectionScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _codeController = TextEditingController();
   final _nameController = TextEditingController();
 
   @override
@@ -26,28 +33,32 @@ class _CreateCourseScreenState extends State<CreateCourseScreen> {
 
   @override
   void dispose() {
-    _codeController.dispose();
     _nameController.dispose();
     super.dispose();
   }
 
   void _saveForm() async {
-    final courseProvider = Provider.of<CourseProvider>(context, listen: false);
+    final sectionProvider = Provider.of<SectionProvider>(context, listen: false);
+    final courseInSemesterProvider = Provider.of<CourseInSemesterProvider>(context, listen: false);
     final navigator = Navigator.of(context);
 
     if (_formKey.currentState!.validate()) {
       // Process the form data
-      final code = _codeController.text.trim().replaceAll(RegExp(r'\s+'), ' ').toUpperCase();
       final name = _nameController.text.trim().replaceAll(RegExp(r'\s+'), ' ').toUpperCase();
 
       try {
-        await courseProvider.addCourse(code, name);
+        await sectionProvider.addSection(
+            name,
+            widget.semesterId,
+            widget.courseId,
+            courseInSemesterProvider
+        );
 
         if (mounted) {
           CustomToast.show(
             context: context,
-            title: 'Curso creado',
-            detail: 'El curso $name ha sido creado exitosamente.',
+            title: 'Horario creado',
+            detail: 'El horario $name ha sido creado exitosamente.',
             type: CustomToastType.success,
             position: ToastPosition.top,
           );
@@ -59,7 +70,7 @@ class _CreateCourseScreenState extends State<CreateCourseScreen> {
           final errorMessage = e.toString().replaceFirst("Exception: ", "");
           CustomToast.show(
             context: context,
-            title: 'Error al crear el curso',
+            title: 'Error al crear el horario',
             detail: errorMessage,
             type: CustomToastType.error,
             position: ToastPosition.top,
@@ -74,9 +85,9 @@ class _CreateCourseScreenState extends State<CreateCourseScreen> {
     SizeConfig.init(context);
 
     return BaseCreationScreen(
-      title: 'Cursos - Creación',
-      onSave: _saveForm,
-      body: _buildForm()
+        title: 'Horarios - Creación',
+        onSave: _saveForm,
+        body: _buildForm()
     );
   }
 
@@ -89,35 +100,18 @@ class _CreateCourseScreenState extends State<CreateCourseScreen> {
           vertical: SizeConfig.scaleHeight(2.3),
         ),
         children: [
-          // Code
-          CustomTextField(
-            controller: _codeController,
-            label: 'Código',
-            hintText: 'Ingrese el código del curso',
-            validator: (value) {
-              final trimmedValue = value?.trim() ?? '';
-              if (trimmedValue.isEmpty) {
-                return 'Por favor, ingrese un código.';
-              }
-              if (trimmedValue.length != 6) {
-                return 'El código debe tener 6 caracteres.';
-              }
-              return null;
-            }
-          ),
-          SizedBox(height: SizeConfig.scaleHeight(2.3)),
           // Name
           CustomTextField(
             controller: _nameController,
             label: 'Nombre',
-            hintText: 'Ingrese el nombre del curso',
+            hintText: 'Ingrese el nombre del horario',
             validator: (value) {
               final trimmedValue = value?.trim() ?? '';
               if (trimmedValue.isEmpty) {
                 return 'Por favor, ingrese un nombre.';
               }
-              if (trimmedValue.length > 100) {
-                return 'El nombre no debe exceder los 100 caracteres.';
+              if (trimmedValue.length > 20) {
+                return 'El nombre no debe exceder los 20 caracteres.';
               }
               return null;
             },

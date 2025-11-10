@@ -109,6 +109,9 @@ class AppTheme {
           inputTextStyle: AppTextStyles.bodyM().copyWith(
             color: AppColors.neutralDarkDarkest,
           ),
+          optionalLabelStyle: AppTextStyles.actionS().copyWith(
+            color: AppColors.neutralDarkLightest,
+          ),
         ),
       ],
     );
@@ -214,6 +217,9 @@ class AppTheme {
           ),
           inputTextStyle: AppTextStyles.bodyM().copyWith(
             color: AppColors.neutralLightLightest,
+          ),
+          optionalLabelStyle: AppTextStyles.actionS().copyWith(
+            color: AppColors.neutralLightDarkest,
           ),
         ),
       ],

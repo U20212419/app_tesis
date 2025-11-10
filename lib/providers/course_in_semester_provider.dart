@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:app_tesis/providers/course_provider.dart';
 import 'package:app_tesis/providers/semester_provider.dart';
 import 'package:dio/dio.dart';
@@ -19,6 +21,32 @@ class CourseInSemesterProvider with ChangeNotifier {
   void clearCoursesInSemesterList() {
     _coursesInSemester = [];
     _isLoading = true;
+  }
+
+  // Update the assessment count when an assessment is created or deleted
+  void updateAssessmentCount(int idSemester, int idCourse, int counter) {
+    try {
+      final courseInSemester = _coursesInSemester.firstWhere(
+          (cis) => cis.idSemester == idSemester && cis.course.id == idCourse);
+      courseInSemester.assessmentCount =
+          (courseInSemester.assessmentCount ?? 0) + counter;
+      notifyListeners();
+    } catch (e) {
+      log('Error updating assessment count: $e');
+    }
+  }
+
+  // Update the section count when a section is created or deleted
+  void updateSectionCount(int idSemester, int idCourse, int counter) {
+    try {
+      final courseInSemester = _coursesInSemester.firstWhere(
+          (cis) => cis.idSemester == idSemester && cis.course.id == idCourse);
+      courseInSemester.sectionCount =
+          (courseInSemester.sectionCount ?? 0) + counter;
+      notifyListeners();
+    } catch (e) {
+      log('Error updating section count: $e');
+    }
   }
 
   // Fetch all courses in all semesters

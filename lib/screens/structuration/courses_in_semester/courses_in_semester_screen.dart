@@ -69,7 +69,7 @@ class _CoursesInSemesterScreenState extends State<CoursesInSemesterScreen> {
           final errorMessage = e.toString().replaceFirst("Exception: ", "");
           CustomToast.show(
             context: context,
-            title: 'Error al cargar los cursos en el semestre.',
+            title: 'Error al cargar los cursos en el semestre',
             detail: errorMessage,
             type: CustomToastType.error,
             position: ToastPosition.top,
@@ -132,13 +132,35 @@ class _CoursesInSemesterScreenState extends State<CoursesInSemesterScreen> {
     }
   }
 
-  void _onCourseTap(int courseId) async {
+  void _onCourseTap(int courseId, int semesterId, String semesterAndCourseCodeNames) async {
     final courseInSemesterProvider = Provider.of<CourseInSemesterProvider>(context, listen: false);
     final courseProvider = Provider.of<CourseProvider>(context, listen: false);
     final theme = Theme.of(context);
 
-    if (_activeMode == ActiveMode.remove) {
-      log('Mode: $_activeMode - Course ID: $courseId. Showing RemoveCourseModal.');
+    if (_activeMode == ActiveMode.none) {
+      log('Mode: $_activeMode - Course ID: $courseId. Navigating to AssessmentsAndSectionsScreen.');
+
+      setState(() {
+        _isNavigatingToModeAction = true;
+      });
+
+      await Navigator.pushNamed(
+        context,
+        '/assessmentsAndSections',
+        arguments: {
+          'semesterId': semesterId,
+          'courseId': courseId,
+          'semesterAndCourseCodeNames': semesterAndCourseCodeNames,
+        },
+      );
+
+      if (mounted) {
+        setState(() {
+          _isNavigatingToModeAction = false;
+        });
+      }
+    } else if (_activeMode == ActiveMode.remove) {
+      log('Mode: $_activeMode - Course ID: $courseId. Showing modal to remove course.');
 
       // Search for the course to remove
       Course? course;
@@ -494,7 +516,9 @@ class _CoursesInSemesterScreenState extends State<CoursesInSemesterScreen> {
           title: '${courseInSemester.course.code} - ${courseInSemester.course.name}',
           subtitle: '$assessmentsSubtitle | $sectionsSubtitle',
           onTap: () => _onCourseTap(
-              courseInSemester.course.id
+            courseInSemester.course.id,
+            _semesterId,
+            '$_semesterName | ${courseInSemester.course.code}'
           ),
           trailingIcon: Symbols.arrow_forward_ios_rounded,
         );

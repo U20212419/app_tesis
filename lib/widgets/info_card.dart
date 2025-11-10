@@ -10,6 +10,7 @@ class InfoCard extends StatelessWidget {
   final String? subtitle;
   final VoidCallback? onTap;
   final IconData? trailingIcon;
+  final double? trailingIconSize;
 
   const InfoCard({
     super.key,
@@ -17,6 +18,7 @@ class InfoCard extends StatelessWidget {
     this.subtitle,
     this.onTap,
     this.trailingIcon,
+    this.trailingIconSize,
   });
 
   @override
@@ -72,7 +74,7 @@ class InfoCard extends StatelessWidget {
                   padding: EdgeInsets.only(left: SizeConfig.scaleWidth(4.4)),
                   child: Icon(
                     trailingIcon,
-                    size: SizeConfig.scaleHeight(1.9),
+                    size: SizeConfig.scaleHeight(trailingIconSize ?? 1.9),
                     fill: 1.0,
                     color: infoCardTheme?.iconColor ?? AppColors.neutralDarkLightest,
                   )

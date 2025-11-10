@@ -3,8 +3,8 @@ import 'course.dart';
 class CourseInSemester {
   final Course course;
   final int idSemester;
-  final int? assessmentCount;
-  final int? sectionCount;
+  int? assessmentCount;
+  int? sectionCount;
 
   CourseInSemester({
     required this.course,

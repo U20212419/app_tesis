@@ -62,6 +62,10 @@ class ErrorHandler {
         return 'El semestre solicitado no fue encontrado.';
       case 'ERR_COURSE_IN_SEMESTER_NOT_FOUND':
         return 'El curso solicitado no fue encontrado en el semestre seleccionado.';
+      case 'ERR_ASSESSMENT_NOT_FOUND':
+        return 'La evaluación solicitada no fue encontrada.';
+      case 'ERR_SECTION_NOT_FOUND':
+        return 'El horario solicitado no fue encontrado.';
       case 'ERR_COURSE_CODE_DUPLICATE':
         return 'Ya existe un curso con el código ingresado.';
       case 'ERR_SEMESTER_KEY_DUPLICATE':

@@ -1,62 +1,60 @@
-import 'package:app_tesis/widgets/custom_toast.dart';
+import 'package:app_tesis/providers/course_in_semester_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../models/course.dart';
-import '../../providers/course_provider.dart';
-import '../../utils/size_config.dart';
-import '../../widgets/base_form_screen.dart';
-import '../../widgets/custom_text_field.dart';
+import '../../../../models/section.dart';
+import '../../../../providers/section_provider.dart';
+import '../../../../utils/size_config.dart';
+import '../../../../widgets/base_form_screen.dart';
+import '../../../../widgets/custom_text_field.dart';
+import '../../../../widgets/custom_toast.dart';
 
-class EditCourseScreen extends StatefulWidget {
-  final int courseId;
+class EditSectionScreen extends StatefulWidget {
+  final int sectionId;
 
-  const EditCourseScreen({
+  const EditSectionScreen({
     super.key,
-    required this.courseId,
+    required this.sectionId,
   });
 
   @override
-  State<EditCourseScreen> createState() => _EditCourseScreenState();
+  State<EditSectionScreen> createState() => _EditSectionScreenState();
 }
 
-class _EditCourseScreenState extends State<EditCourseScreen> {
+class _EditSectionScreenState extends State<EditSectionScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _codeController = TextEditingController();
   final _nameController = TextEditingController();
 
   bool _isInit = true;
-  late int _courseId;
+  late int _sectionId;
 
   @override
   void initState() {
     super.initState();
-    _courseId = widget.courseId;
+    _sectionId = widget.sectionId;
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_isInit) {
-      // Search for the course to edit
-      final courseProvider = Provider.of<CourseProvider>(context, listen: false);
+      final sectionProvider = Provider.of<SectionProvider>(context, listen: false);
 
-      Course? course;
+      Section? section;
       try {
-        course = courseProvider.courses.firstWhere((c) => c.id == _courseId);
+        section = sectionProvider.sections.firstWhere((sec) => sec.id == _sectionId);
       } catch (e) {
-        course = null;
+        section = null;
       }
 
-      if (course != null) {
-        _codeController.text = course.code;
-        _nameController.text = course.name;
+      if (section != null) {
+        _nameController.text = section.name;
       } else {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           CustomToast.show(
             context: context,
             title: 'Error',
-            detail: 'No se pudo encontrar el curso para editar.',
+            detail: 'No se pudo encontrar el horario para editar.',
             type: CustomToastType.error,
           );
           Navigator.of(context).pop();
@@ -68,32 +66,29 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
 
   @override
   void dispose() {
-    _codeController.dispose();
     _nameController.dispose();
     super.dispose();
   }
 
   void _saveForm() async {
-    final courseProvider = Provider.of<CourseProvider>(context, listen: false);
+    final sectionProvider = Provider.of<SectionProvider>(context, listen: false);
     final navigator = Navigator.of(context);
 
     if (_formKey.currentState!.validate()) {
       // Process the form data
-      final code = _codeController.text.trim().replaceAll(RegExp(r'\s+'), ' ').toUpperCase();
       final name = _nameController.text.trim().replaceAll(RegExp(r'\s+'), ' ').toUpperCase();
 
       try {
-        await courseProvider.updateCourse(
-          _courseId,
-          code,
-          name,
+        await sectionProvider.updateSection(
+            _sectionId,
+            name,
         );
 
         if (mounted) {
           CustomToast.show(
             context: context,
-            title: 'Curso editado',
-            detail: 'El curso ha sido editado exitosamente.',
+            title: 'Horario editado',
+            detail: 'El horario ha sido editado exitosamente.',
             type: CustomToastType.success,
             position: ToastPosition.top,
           );
@@ -105,7 +100,7 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
           final errorMessage = e.toString().replaceFirst("Exception: ", "");
           CustomToast.show(
             context: context,
-            title: 'Error al editar el curso',
+            title: 'Error al editar el horario',
             detail: errorMessage,
             type: CustomToastType.error,
             position: ToastPosition.top,
@@ -120,7 +115,7 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
     SizeConfig.init(context);
 
     return BaseCreationScreen(
-        title: 'Cursos - Edición',
+        title: 'Horarios - Edición',
         onSave: _saveForm,
         body: _buildForm()
     );
@@ -135,35 +130,18 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
           vertical: SizeConfig.scaleHeight(2.3),
         ),
         children: [
-          // Code
-          CustomTextField(
-              controller: _codeController,
-              label: 'Código',
-              hintText: 'Ingrese el código del curso',
-              validator: (value) {
-                final trimmedValue = value?.trim() ?? '';
-                if (trimmedValue.isEmpty) {
-                  return 'Por favor, ingrese un código.';
-                }
-                if (trimmedValue.length != 6) {
-                  return 'El código debe tener 6 caracteres.';
-                }
-                return null;
-              }
-          ),
-          SizedBox(height: SizeConfig.scaleHeight(2.3)),
           // Name
           CustomTextField(
             controller: _nameController,
             label: 'Nombre',
-            hintText: 'Ingrese el nombre del curso',
+            hintText: 'Ingrese el nombre del horario',
             validator: (value) {
               final trimmedValue = value?.trim() ?? '';
               if (trimmedValue.isEmpty) {
                 return 'Por favor, ingrese un nombre.';
               }
-              if (trimmedValue.length > 100) {
-                return 'El nombre no debe exceder los 100 caracteres.';
+              if (trimmedValue.length > 20) {
+                return 'El nombre no debe exceder los 20 caracteres.';
               }
               return null;
             },

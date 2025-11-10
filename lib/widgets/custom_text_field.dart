@@ -13,6 +13,7 @@ class CustomTextField extends StatelessWidget {
   final FormFieldValidator<String>? validator;
   final TextInputType? keyboardType;
   final List<TextInputFormatter>? inputFormatters;
+  final bool isOptional;
 
   const CustomTextField({
     super.key,
@@ -22,6 +23,7 @@ class CustomTextField extends StatelessWidget {
     this.validator,
     this.keyboardType,
     this.inputFormatters,
+    this.isOptional = false,
   });
 
   @override
@@ -33,11 +35,27 @@ class CustomTextField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: customTextFieldTheme?.fieldNameStyle ?? AppTextStyles.heading5().copyWith(
-            color: AppColors.neutralDarkDark,
-          ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Text(
+              label,
+              style: customTextFieldTheme?.fieldNameStyle ?? AppTextStyles.heading5().copyWith(
+                color: AppColors.neutralDarkDark,
+              ),
+            ),
+            if (isOptional)
+              Padding(
+                padding: EdgeInsets.only(left: SizeConfig.scaleWidth(0.5)),
+                child: Text(
+                  '(opcional)',
+                  style: customTextFieldTheme?.optionalLabelStyle ?? AppTextStyles.actionS().copyWith(
+                    color: AppColors.neutralDarkLightest,
+                  ),
+                ),
+              )
+          ],
         ),
         SizedBox(height: SizeConfig.scaleHeight(1.25)),
         Theme(
@@ -56,6 +74,7 @@ class CustomTextField extends StatelessWidget {
             inputFormatters: inputFormatters,
             decoration: InputDecoration(
               hintText: hintText,
+              errorMaxLines: 2,
             ),
             validator: validator,
             autovalidateMode: AutovalidateMode.onUserInteraction,
