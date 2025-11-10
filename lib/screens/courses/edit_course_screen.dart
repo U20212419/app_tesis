@@ -25,6 +25,9 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
   final _codeController = TextEditingController();
   final _nameController = TextEditingController();
 
+  String _currentCode = '';
+  String _currentName = '';
+
   bool _isInit = true;
   late int _courseId;
 
@@ -49,8 +52,8 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
       }
 
       if (course != null) {
-        _codeController.text = course.code;
-        _nameController.text = course.name;
+        _codeController.text = _currentCode = course.code;
+        _nameController.text = _currentName = course.name;
       } else {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           CustomToast.show(
@@ -82,35 +85,53 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
       final code = _codeController.text.trim().replaceAll(RegExp(r'\s+'), ' ').toUpperCase();
       final name = _nameController.text.trim().replaceAll(RegExp(r'\s+'), ' ').toUpperCase();
 
-      try {
-        await courseProvider.updateCourse(
-          _courseId,
-          code,
-          name,
+      final currentCode = _currentCode.trim().replaceAll(RegExp(r'\s+'), ' ').toUpperCase();
+      final currentName = _currentName.trim().replaceAll(RegExp(r'\s+'), ' ').toUpperCase();
+
+      final bool hasChanges =
+          code != currentCode ||
+          name != currentName;
+
+      if (hasChanges) {
+        try {
+          await courseProvider.updateCourse(
+            _courseId,
+            code,
+            name,
+          );
+
+          if (mounted) {
+            CustomToast.show(
+              context: context,
+              title: 'Curso editado',
+              detail: 'El curso ha sido editado exitosamente.',
+              type: CustomToastType.success,
+              position: ToastPosition.top,
+            );
+
+            navigator.pop(); // Go back after saving
+          }
+        } catch (e) {
+          if (mounted) {
+            final errorMessage = e.toString().replaceFirst("Exception: ", "");
+            CustomToast.show(
+              context: context,
+              title: 'Error al editar el curso',
+              detail: errorMessage,
+              type: CustomToastType.error,
+              position: ToastPosition.top,
+            );
+          }
+        }
+      } else {
+        // No changes made
+        CustomToast.show(
+          context: context,
+          title: 'Sin cambios',
+          detail: 'No se ha modificado ningún campo.',
+          type: CustomToastType.warning,
+          position: ToastPosition.top,
         );
-
-        if (mounted) {
-          CustomToast.show(
-            context: context,
-            title: 'Curso editado',
-            detail: 'El curso ha sido editado exitosamente.',
-            type: CustomToastType.success,
-            position: ToastPosition.top,
-          );
-
-          navigator.pop(); // Go back after saving
-        }
-      } catch (e) {
-        if (mounted) {
-          final errorMessage = e.toString().replaceFirst("Exception: ", "");
-          CustomToast.show(
-            context: context,
-            title: 'Error al editar el curso',
-            detail: errorMessage,
-            type: CustomToastType.error,
-            position: ToastPosition.top,
-          );
-        }
       }
     }
   }

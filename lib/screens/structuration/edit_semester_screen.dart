@@ -30,6 +30,9 @@ class _EditSemesterScreenState extends State<EditSemesterScreen> {
   final _yearController = TextEditingController();
   String? _selectedNumber;
 
+  String _currentYear = '';
+  String _currentNumber = '';
+
   bool _isInit = true;
   late int _semesterId;
 
@@ -54,8 +57,8 @@ class _EditSemesterScreenState extends State<EditSemesterScreen> {
       }
 
       if (semester != null) {
-        _yearController.text = semester.year.toString();
-        _selectedNumber = semester.number.toString();
+        _yearController.text = _currentYear = semester.year.toString();
+        _selectedNumber = _currentNumber = semester.number.toString();
       } else {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           CustomToast.show(
@@ -86,35 +89,53 @@ class _EditSemesterScreenState extends State<EditSemesterScreen> {
       final year = _yearController.text.trim();
       final number = _selectedNumber!;
 
-      try {
-        await semesterProvider.updateSemester(
-          _semesterId,
-          year,
-          number,
+      final currentYear = _currentYear.trim();
+      final currentNumber = _currentNumber;
+
+      final bool hasChanges =
+          year != currentYear ||
+          number != currentNumber;
+
+      if (hasChanges) {
+        try {
+          await semesterProvider.updateSemester(
+            _semesterId,
+            year,
+            number,
+          );
+
+          if (mounted) {
+            CustomToast.show(
+              context: context,
+              title: 'Semestre editado',
+              detail: 'El semestre ha sido editado exitosamente.',
+              type: CustomToastType.success,
+              position: ToastPosition.top,
+            );
+
+            navigator.pop(); // Go back after saving
+          }
+        } catch (e) {
+          if (mounted) {
+            final errorMessage = e.toString().replaceFirst("Exception: ", "");
+            CustomToast.show(
+              context: context,
+              title: 'Error al editar el semestre',
+              detail: errorMessage,
+              type: CustomToastType.error,
+              position: ToastPosition.top,
+            );
+          }
+        }
+      } else {
+        // No changes made
+        CustomToast.show(
+          context: context,
+          title: 'Sin cambios',
+          detail: 'No se ha modificado ningún campo.',
+          type: CustomToastType.warning,
+          position: ToastPosition.top,
         );
-
-        if (mounted) {
-          CustomToast.show(
-            context: context,
-            title: 'Semestre editado',
-            detail: 'El semestre ha sido editado exitosamente.',
-            type: CustomToastType.success,
-            position: ToastPosition.top,
-          );
-
-          navigator.pop(); // Go back after saving
-        }
-      } catch (e) {
-        if (mounted) {
-          final errorMessage = e.toString().replaceFirst("Exception: ", "");
-          CustomToast.show(
-            context: context,
-            title: 'Error al editar el semestre',
-            detail: errorMessage,
-            type: CustomToastType.error,
-            position: ToastPosition.top,
-          );
-        }
       }
     }
   }
@@ -197,6 +218,7 @@ class _EditSemesterScreenState extends State<EditSemesterScreen> {
                   elevation: 2,
                   isExpanded: true,
                   decoration: const InputDecoration(
+                    errorMaxLines: 2,
                   ),
                   items: ['0', '1', '2'].map((String value) {
                     return DropdownMenuItem<String>(

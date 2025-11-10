@@ -25,6 +25,8 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
 
+  String _currentName = '';
+
   bool _isInit = true;
   late int _sectionId;
 
@@ -48,7 +50,7 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
       }
 
       if (section != null) {
-        _nameController.text = section.name;
+        _nameController.text = _currentName = section.name;
       } else {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           CustomToast.show(
@@ -78,34 +80,49 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
       // Process the form data
       final name = _nameController.text.trim().replaceAll(RegExp(r'\s+'), ' ').toUpperCase();
 
-      try {
-        await sectionProvider.updateSection(
+      final currentName = _currentName.trim().replaceAll(RegExp(r'\s+'), ' ').toUpperCase();
+
+      final bool hasChanges = name != currentName;
+
+      if (hasChanges) {
+        try {
+          await sectionProvider.updateSection(
             _sectionId,
             name,
+          );
+
+          if (mounted) {
+            CustomToast.show(
+              context: context,
+              title: 'Horario editado',
+              detail: 'El horario ha sido editado exitosamente.',
+              type: CustomToastType.success,
+              position: ToastPosition.top,
+            );
+
+            navigator.pop(); // Go back after saving
+          }
+        } catch (e) {
+          if (mounted) {
+            final errorMessage = e.toString().replaceFirst("Exception: ", "");
+            CustomToast.show(
+              context: context,
+              title: 'Error al editar el horario',
+              detail: errorMessage,
+              type: CustomToastType.error,
+              position: ToastPosition.top,
+            );
+          }
+        }
+      } else {
+        // No changes made
+        CustomToast.show(
+          context: context,
+          title: 'Sin cambios',
+          detail: 'No se ha modificado ningún campo.',
+          type: CustomToastType.warning,
+          position: ToastPosition.top,
         );
-
-        if (mounted) {
-          CustomToast.show(
-            context: context,
-            title: 'Horario editado',
-            detail: 'El horario ha sido editado exitosamente.',
-            type: CustomToastType.success,
-            position: ToastPosition.top,
-          );
-
-          navigator.pop(); // Go back after saving
-        }
-      } catch (e) {
-        if (mounted) {
-          final errorMessage = e.toString().replaceFirst("Exception: ", "");
-          CustomToast.show(
-            context: context,
-            title: 'Error al editar el horario',
-            detail: errorMessage,
-            type: CustomToastType.error,
-            position: ToastPosition.top,
-          );
-        }
       }
     }
   }

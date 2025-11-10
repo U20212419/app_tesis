@@ -14,6 +14,7 @@ class CustomTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final List<TextInputFormatter>? inputFormatters;
   final bool isOptional;
+  final int errorMaxLines;
 
   const CustomTextField({
     super.key,
@@ -24,6 +25,7 @@ class CustomTextField extends StatelessWidget {
     this.keyboardType,
     this.inputFormatters,
     this.isOptional = false,
+    this.errorMaxLines = 2,
   });
 
   @override
@@ -74,7 +76,7 @@ class CustomTextField extends StatelessWidget {
             inputFormatters: inputFormatters,
             decoration: InputDecoration(
               hintText: hintText,
-              errorMaxLines: 2,
+              errorMaxLines: errorMaxLines,
             ),
             validator: validator,
             autovalidateMode: AutovalidateMode.onUserInteraction,

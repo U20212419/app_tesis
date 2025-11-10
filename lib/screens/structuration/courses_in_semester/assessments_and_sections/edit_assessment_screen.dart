@@ -32,6 +32,10 @@ class _EditAssessmentScreenState extends State<EditAssessmentScreen> {
   final _questionAmountController = TextEditingController();
   String? _selectedType;
 
+  String _currentNumber = '';
+  String _currentQuestionAmount = '';
+  String _currentType = '';
+
   bool _isInit = true;
   late int _assessmentId;
 
@@ -55,9 +59,9 @@ class _EditAssessmentScreenState extends State<EditAssessmentScreen> {
       }
 
       if (assessment != null) {
-        _selectedType = assessment.type;
-        _numberController.text = assessment.number.toString();
-        _questionAmountController.text = assessment.questionAmount?.toString() ?? '';
+        _selectedType = _currentType = assessment.type;
+        _numberController.text = _currentNumber = assessment.number.toString();
+        _questionAmountController.text = _currentQuestionAmount = assessment.questionAmount?.toString() ?? '';
       } else {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           CustomToast.show(
@@ -91,36 +95,57 @@ class _EditAssessmentScreenState extends State<EditAssessmentScreen> {
       final String? questionAmount = questionAmountText.isEmpty ? null : questionAmountText;
       final type = _selectedType!;
 
-      try {
-        await assessmentProvider.updateAssessment(
+      final currentNumber = _currentNumber.trim();
+      final String currentQuestionAmountText = _currentQuestionAmount.trim();
+      final String? currentQuestionAmount = currentQuestionAmountText.isEmpty ? null : currentQuestionAmountText;
+      final currentType = _currentType;
+
+      final bool hasChanges =
+          number != currentNumber ||
+          questionAmount != currentQuestionAmount ||
+          type != currentType;
+
+      if (hasChanges) {
+        try {
+          await assessmentProvider.updateAssessment(
             _assessmentId,
             type,
             number,
             questionAmount,
+          );
+
+          if (mounted) {
+            CustomToast.show(
+              context: context,
+              title: 'Evaluación editada',
+              detail: 'La evaluación ha sido editada exitosamente.',
+              type: CustomToastType.success,
+              position: ToastPosition.top,
+            );
+
+            navigator.pop(); // Go back after saving
+          }
+        } catch (e) {
+          if (mounted) {
+            final errorMessage = e.toString().replaceFirst("Exception: ", "");
+            CustomToast.show(
+              context: context,
+              title: 'Error al editar la evaluación',
+              detail: errorMessage,
+              type: CustomToastType.error,
+              position: ToastPosition.top,
+            );
+          }
+        }
+      } else {
+        // No changes made
+        CustomToast.show(
+          context: context,
+          title: 'Sin cambios',
+          detail: 'No se ha modificado ningún campo.',
+          type: CustomToastType.warning,
+          position: ToastPosition.top,
         );
-
-        if (mounted) {
-          CustomToast.show(
-            context: context,
-            title: 'Evaluación editada',
-            detail: 'La evaluación ha sido editada exitosamente.',
-            type: CustomToastType.success,
-            position: ToastPosition.top,
-          );
-
-          navigator.pop(); // Go back after saving
-        }
-      } catch (e) {
-        if (mounted) {
-          final errorMessage = e.toString().replaceFirst("Exception: ", "");
-          CustomToast.show(
-            context: context,
-            title: 'Error al editar la evaluación',
-            detail: errorMessage,
-            type: CustomToastType.error,
-            position: ToastPosition.top,
-          );
-        }
       }
     }
   }
