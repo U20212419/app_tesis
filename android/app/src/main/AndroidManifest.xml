@@ -1,4 +1,13 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+
+    <!-- Permission to use the camera -->
+    <uses-permission android:name="android.permission.CAMERA"/>
+
+    <!-- Remove permission to record audio -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" tools:node="remove"/>
+
     <application
         android:label="app_tesis"
         android:name="${applicationName}"

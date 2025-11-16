@@ -1,4 +1,3 @@
-import 'package:app_tesis/providers/course_in_semester_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

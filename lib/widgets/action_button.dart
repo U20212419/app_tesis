@@ -91,8 +91,12 @@ class ActionButton extends StatelessWidget {
       borderRadius: BorderRadius.circular(SizeConfig.scaleHeight(borderRadius)),
       onTap: onTap,
       child: Container(
-        width: width ?? SizeConfig.scaleWidth(18),
-        height: height ?? SizeConfig.scaleHeight(7),
+        width: width ?? (layout == ButtonLayout.vertical
+            ? SizeConfig.scaleWidth(18)
+            : SizeConfig.scaleWidth(27.8)),
+        height: height ?? (layout == ButtonLayout.vertical
+            ? SizeConfig.scaleHeight(7)
+            : SizeConfig.scaleHeight(6.2)),
         decoration: BoxDecoration(
           color: containerColor,
           border: containerBorder,

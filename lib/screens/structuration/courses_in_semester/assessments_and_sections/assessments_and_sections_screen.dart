@@ -1,8 +1,11 @@
 import 'dart:developer';
 
 import 'package:app_tesis/providers/assessment_provider.dart';
+import 'package:app_tesis/screens/structuration/courses_in_semester/assessments_and_sections/recording/recording_screen.dart';
+import 'package:app_tesis/widgets/custom_text_field.dart';
 import 'package:diacritic/diacritic.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 import 'package:visibility_detector/visibility_detector.dart';
@@ -226,9 +229,12 @@ class _AssessmentsAndSectionsScreenState extends State<AssessmentsAndSectionsScr
               color: theme.colorScheme.onSurfaceVariant
           ),
         ),
-        onActionPressed: () {
-          _deleteAssessment(assessmentProvider, assessmentId);
-          return true;
+        onActionPressed: (BuildContext dialogContext) async {
+          return await _deleteAssessment(
+              assessmentProvider,
+              assessmentId,
+              dialogContext
+          );
         },
       );
 
@@ -244,30 +250,38 @@ class _AssessmentsAndSectionsScreenState extends State<AssessmentsAndSectionsScr
     }
   }
 
-  void _deleteAssessment(AssessmentProvider provider, int assessmentId) async {
+  Future<bool> _deleteAssessment(
+      AssessmentProvider provider,
+      int assessmentId,
+      BuildContext dialogContext
+  ) async {
     try {
       await provider.deleteAssessment(assessmentId);
 
-      if (mounted) {
+      if (mounted && dialogContext.mounted) {
         CustomToast.show(
-          context: context,
+          context: dialogContext,
           title: 'Evaluación eliminada',
           detail: 'La evaluación ha sido eliminada exitosamente.',
           type: CustomToastType.success,
           position: ToastPosition.top,
         );
       }
+
+      return true;
     } catch (e) {
       final errorMessage = e.toString().replaceFirst("Exception: ", "");
-      if (mounted) {
+      if (mounted && dialogContext.mounted) {
         CustomToast.show(
-          context: context,
+          context: dialogContext,
           title: 'Error al eliminar la evaluación',
           detail: errorMessage,
           type: CustomToastType.error,
           position: ToastPosition.top,
         );
       }
+
+      return false;
     }
   }
 
@@ -335,9 +349,12 @@ class _AssessmentsAndSectionsScreenState extends State<AssessmentsAndSectionsScr
               color: theme.colorScheme.onSurfaceVariant
           ),
         ),
-        onActionPressed: () {
-          _deleteSection(sectionProvider, sectionId);
-          return true;
+        onActionPressed: (BuildContext dialogContext) async {
+          return await _deleteSection(
+              sectionProvider,
+              sectionId,
+              dialogContext
+          );
         },
       );
 
@@ -353,30 +370,38 @@ class _AssessmentsAndSectionsScreenState extends State<AssessmentsAndSectionsScr
     }
   }
 
-  void _deleteSection(SectionProvider provider, int sectionId) async {
+  Future<bool> _deleteSection(
+      SectionProvider provider,
+      int sectionId,
+      BuildContext dialogContext
+  ) async {
     try {
       await provider.deleteSection(sectionId);
 
-      if (mounted) {
+      if (mounted && dialogContext.mounted) {
         CustomToast.show(
-          context: context,
+          context: dialogContext,
           title: 'Horario eliminado',
           detail: 'El horario ha sido eliminado exitosamente.',
           type: CustomToastType.success,
           position: ToastPosition.top,
         );
       }
+
+      return true;
     } catch (e) {
       final errorMessage = e.toString().replaceFirst("Exception: ", "");
-      if (mounted) {
+      if (mounted && dialogContext.mounted) {
         CustomToast.show(
-          context: context,
+          context: dialogContext,
           title: 'Error al eliminar el horario',
           detail: errorMessage,
           type: CustomToastType.error,
           position: ToastPosition.top,
         );
       }
+
+      return false;
     }
   }
 
@@ -411,6 +436,61 @@ class _AssessmentsAndSectionsScreenState extends State<AssessmentsAndSectionsScr
     }
   }
 
+  Future<bool> _updateQuestionAmount(
+      AssessmentProvider provider,
+      Assessment selectedAssessment,
+      String questionAmount,
+      BuildContext dialogContext
+  ) async {
+    try {
+      await provider.updateAssessment(
+          selectedAssessment.id,
+          selectedAssessment.type,
+          selectedAssessment.number.toString(),
+          questionAmount
+      );
+
+      if (mounted && dialogContext.mounted) {
+        CustomToast.show(
+          context: dialogContext,
+          title: 'Cantidad de preguntas actualizada',
+          detail: 'La cantidad de preguntas ha sido actualizada exitosamente.',
+          type: CustomToastType.success,
+          position: ToastPosition.top,
+        );
+      }
+
+      return true;
+    } catch (e) {
+      final errorMessage = e.toString().replaceFirst("Exception: ", "");
+      if (mounted && dialogContext.mounted) {
+        CustomToast.show(
+          context: dialogContext,
+          title: 'Error al actualizar la cantidad de preguntas',
+          detail: errorMessage,
+          type: CustomToastType.error,
+          position: ToastPosition.top,
+        );
+      }
+
+      return false;
+    }
+  }
+
+  void _navigateToRecording(int assessmentId, int sectionId, int questionAmount) {
+    if (!mounted) return;
+
+    Navigator.of(context, rootNavigator: true).push(
+      MaterialPageRoute(
+        builder: (context) => RecordingScreen(
+          assessmentId: assessmentId,
+          sectionId: sectionId,
+          questionAmount: questionAmount,
+        ),
+      )
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     SizeConfig.init(context);
@@ -427,14 +507,19 @@ class _AssessmentsAndSectionsScreenState extends State<AssessmentsAndSectionsScr
       key: const Key('structuration-screen-visibility-detector'),
       onVisibilityChanged: (visibilityInfo) {
         if (visibilityInfo.visibleFraction == 0) {
-          if (_isSearching) {
-            _toggleSearch();
+          if (mounted) {
+            setState(() {
+              if (_isSearching) {
+                _toggleSearch();
+              }
+              if (_activeMode != ActiveMode.none &&
+                  !_isNavigatingToModeAction) {
+                _toggleMode(ActiveMode.none, Colors.transparent);
+              }
+              _selectedAssessmentId = null;
+              _selectedSectionId = null;
+            });
           }
-          if (_activeMode != ActiveMode.none && !_isNavigatingToModeAction) {
-            _toggleMode(ActiveMode.none, Colors.transparent);
-          }
-          _selectedAssessmentId = null;
-          _selectedSectionId = null;
         }
       },
       child: Column(
@@ -513,8 +598,11 @@ class _AssessmentsAndSectionsScreenState extends State<AssessmentsAndSectionsScr
                 icon: Symbols.photo_camera_rounded,
                 label: 'Grabar',
                 accentColor: AppColors.supportSuccessDark,
-                onTap: () {
-                  if (_selectedAssessmentId == null && _selectedSectionId == null) {
+                onTap: () async {
+                  final int? currentAssessmentId = _selectedAssessmentId;
+                  final int? currentSectionId = _selectedSectionId;
+
+                  if (currentAssessmentId == null && currentSectionId == null) {
                     CustomToast.show(
                       context: context,
                       title: 'Opción no disponible',
@@ -522,7 +610,7 @@ class _AssessmentsAndSectionsScreenState extends State<AssessmentsAndSectionsScr
                       type: CustomToastType.warning,
                       position: ToastPosition.top,
                     );
-                  } else if (_selectedAssessmentId == null) {
+                  } else if (currentAssessmentId == null) {
                     CustomToast.show(
                       context: context,
                       title: 'Opción no disponible',
@@ -530,7 +618,7 @@ class _AssessmentsAndSectionsScreenState extends State<AssessmentsAndSectionsScr
                       type: CustomToastType.warning,
                       position: ToastPosition.top,
                     );
-                  } else if (_selectedSectionId == null) {
+                  } else if (currentSectionId == null) {
                     CustomToast.show(
                       context: context,
                       title: 'Opción no disponible',
@@ -539,7 +627,101 @@ class _AssessmentsAndSectionsScreenState extends State<AssessmentsAndSectionsScr
                       position: ToastPosition.top,
                     );
                   } else {
-                    // Navigation logic here
+                    final assessmentProvider = Provider.of<AssessmentProvider>(context, listen: false);
+                    final selectedAssessment = assessmentProvider.assessments.firstWhere(
+                      (a) => a.id == currentAssessmentId,
+                    );
+
+                    int? finalQuestionAmount;
+                    if (selectedAssessment.questionAmount != null) {
+                      finalQuestionAmount = selectedAssessment.questionAmount;
+                    } else {
+                      final formKey = GlobalKey<FormState>();
+                      final questionAmountController = TextEditingController();
+                      questionAmountController.text = '';
+
+                      final bool? didSave = await showCustomDialog<bool>(
+                        context: context,
+                        title: 'Cantidad de Preguntas',
+                        color: AppColors.highlightDarkest,
+                        actionButtonText: "Confirmar",
+                        body: StatefulBuilder(
+                          builder: (context, setState) {
+                            final theme = Theme.of(context);
+
+                            return Form(
+                              key: formKey,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment
+                                    .start,
+                                children: [
+                                  SizedBox(height: SizeConfig.scaleHeight(1.25)),
+                                  Theme(
+                                    data: Theme.of(context).copyWith(
+                                      splashColor: theme.colorScheme.primary,
+                                      highlightColor: theme.colorScheme.primary,
+                                    ),
+                                    child: CustomTextField(
+                                      controller: questionAmountController,
+                                      hintText: 'Ingrese la cantidad de preguntas',
+                                      hintStyle: AppTextStyles.bodyXS().copyWith(
+                                        color: theme.inputDecorationTheme.hintStyle?.color ?? AppColors.neutralDarkLightest,
+                                      ),
+                                      keyboardType: TextInputType.number,
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.digitsOnly,
+                                        LengthLimitingTextInputFormatter(2),
+                                      ],
+                                      validator: (value) {
+                                        final trimmedValue = value?.trim() ?? '';
+                                        if (trimmedValue.isEmpty) {
+                                          return 'Por favor, ingrese una cantidad de preguntas.';
+                                        }
+
+                                        final intValue = int.tryParse(trimmedValue);
+
+                                        if (intValue == null) {
+                                          return 'Por favor, ingrese un número válido.';
+                                        }
+                                        if (intValue <= 0) {
+                                          return 'La cantidad de preguntas debe ser mayor que cero.';
+                                        }
+                                        if (trimmedValue.length > 2) {
+                                          return 'La cantidad de preguntas no debe exceder los 2 dígitos.';
+                                        }
+                                        return null;
+                                      },
+                                    )
+                                  )
+                                ],
+                              ),
+                            );
+                          }
+                        ),
+                        onActionPressed: (BuildContext dialogContext) async {
+                          if (formKey.currentState!.validate()) {
+                            return await _updateQuestionAmount(
+                              assessmentProvider,
+                              selectedAssessment,
+                              questionAmountController.text,
+                              dialogContext
+                            );
+                          }
+                          return false;
+                        },
+                      );
+
+                      if (didSave == true) {
+                        finalQuestionAmount = int.parse(questionAmountController.text.trim());
+                      }
+                    }
+
+                    if (finalQuestionAmount != null) {
+                      if (mounted) {
+                        log('Navigating to RecordingScreen with Assessment ID: $currentAssessmentId and Section ID: $currentSectionId.');
+                        _navigateToRecording(currentAssessmentId, currentSectionId, finalQuestionAmount);
+                      }
+                    }
                   }
                 },
               ),

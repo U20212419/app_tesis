@@ -8,8 +8,9 @@ import '../utils/size_config.dart';
 
 class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
-  final String label;
+  final String? label;
   final String hintText;
+  final TextStyle? hintStyle;
   final FormFieldValidator<String>? validator;
   final TextInputType? keyboardType;
   final List<TextInputFormatter>? inputFormatters;
@@ -19,8 +20,9 @@ class CustomTextField extends StatelessWidget {
   const CustomTextField({
     super.key,
     required this.controller,
-    required this.label,
+    this.label,
     required this.hintText,
+    this.hintStyle,
     this.validator,
     this.keyboardType,
     this.inputFormatters,
@@ -33,6 +35,7 @@ class CustomTextField extends StatelessWidget {
     SizeConfig.init(context);
 
     final CustomTextFieldTheme? customTextFieldTheme = Theme.of(context).extension<CustomTextFieldTheme>();
+    final theme = Theme.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -41,22 +44,23 @@ class CustomTextField extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.baseline,
           textBaseline: TextBaseline.alphabetic,
           children: [
-            Text(
-              label,
-              style: customTextFieldTheme?.fieldNameStyle ?? AppTextStyles.heading5().copyWith(
-                color: AppColors.neutralDarkDark,
-              ),
-            ),
-            if (isOptional)
-              Padding(
-                padding: EdgeInsets.only(left: SizeConfig.scaleWidth(0.5)),
-                child: Text(
-                  '(opcional)',
-                  style: customTextFieldTheme?.optionalLabelStyle ?? AppTextStyles.actionS().copyWith(
-                    color: AppColors.neutralDarkLightest,
-                  ),
+            if (label != null && label!.isNotEmpty)
+              Text(
+                label!,
+                style: customTextFieldTheme?.fieldNameStyle ?? AppTextStyles.heading5().copyWith(
+                  color: AppColors.neutralDarkDark,
                 ),
-              )
+              ),
+              if (isOptional)
+                Padding(
+                  padding: EdgeInsets.only(left: SizeConfig.scaleWidth(0.5)),
+                  child: Text(
+                    '(opcional)',
+                    style: customTextFieldTheme?.optionalLabelStyle ?? AppTextStyles.actionS().copyWith(
+                      color: AppColors.neutralDarkLightest,
+                    ),
+                  ),
+                )
           ],
         ),
         SizedBox(height: SizeConfig.scaleHeight(1.25)),
@@ -76,6 +80,7 @@ class CustomTextField extends StatelessWidget {
             inputFormatters: inputFormatters,
             decoration: InputDecoration(
               hintText: hintText,
+              hintStyle: hintStyle ?? theme.inputDecorationTheme.hintStyle,
               errorMaxLines: errorMaxLines,
             ),
             validator: validator,

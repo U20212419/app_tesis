@@ -133,7 +133,7 @@ class ErrorHandler {
     }
 
     // Generic fallback
-    log('Unknown login error: $e');
-    return 'Ha ocurrido un error inesperado durante el inicio de sesión.';
+    log('Unknown error: $e');
+    return 'Ha ocurrido un error inesperado.';
   }
 }

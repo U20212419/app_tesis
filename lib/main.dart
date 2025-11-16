@@ -3,6 +3,7 @@ import 'package:app_tesis/providers/course_in_semester_provider.dart';
 import 'package:app_tesis/providers/course_provider.dart';
 import 'package:app_tesis/providers/section_provider.dart';
 import 'package:app_tesis/providers/semester_provider.dart';
+import 'package:app_tesis/providers/statistics_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -19,6 +20,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => CourseInSemesterProvider()),
         ChangeNotifierProvider(create: (_) => AssessmentProvider()),
         ChangeNotifierProvider(create: (_) => SectionProvider()),
+        ChangeNotifierProvider(create: (_) => StatisticsProvider()),
       ],
       child: const MyApp(),
     ),

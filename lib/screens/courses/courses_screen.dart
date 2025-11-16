@@ -180,9 +180,12 @@ class _CoursesScreenState extends State<CoursesScreen> {
               color: theme.colorScheme.onSurfaceVariant
           ),
         ),
-        onActionPressed: () {
-          _deleteCourse(courseProvider, courseId);
-          return true;
+        onActionPressed: (BuildContext dialogContext) async {
+          return await _deleteCourse(
+              courseProvider,
+              courseId,
+              dialogContext
+          );
         },
       );
 
@@ -194,30 +197,38 @@ class _CoursesScreenState extends State<CoursesScreen> {
     }
   }
 
-  void _deleteCourse(CourseProvider provider, int courseId) async {
+  Future<bool> _deleteCourse(
+      CourseProvider provider,
+      int courseId,
+      BuildContext dialogContext
+  ) async {
     try {
       await provider.deleteCourse(courseId);
 
-      if (mounted) {
+      if (mounted && dialogContext.mounted) {
         CustomToast.show(
-          context: context,
+          context: dialogContext,
           title: 'Curso eliminado',
           detail: 'El curso ha sido eliminado exitosamente.',
           type: CustomToastType.success,
           position: ToastPosition.top,
         );
       }
+
+      return true;
     } catch (e) {
-      if (mounted) {
+      if (mounted && dialogContext.mounted) {
         final errorMessage = e.toString().replaceFirst("Exception: ", "");
         CustomToast.show(
-          context: context,
+          context: dialogContext,
           title: 'Error al eliminar el curso',
           detail: errorMessage,
           type: CustomToastType.error,
           position: ToastPosition.top,
         );
       }
+
+      return false;
     }
   }
 

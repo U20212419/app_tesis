@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
@@ -10,7 +12,7 @@ Future<T?> showCustomDialog<T>({
   required String title,
   required Widget body,
   required String actionButtonText,
-  required bool Function() onActionPressed,
+  required FutureOr<bool> Function(BuildContext dialogContext) onActionPressed,
   required Color color,
   String cancelButtonText = 'Cancelar',
 }) {
@@ -56,6 +58,7 @@ Future<T?> showCustomDialog<T>({
           onActionPressed: onActionPressed,
           color: color,
           cancelButtonText: cancelButtonText,
+          dialogContext: dialogContext,
         ),
       );
     },
@@ -66,9 +69,10 @@ class _CustomDialogView extends StatefulWidget {
   final String title;
   final Widget body;
   final String actionButtonText;
-  final bool Function() onActionPressed;
+  final FutureOr<bool> Function(BuildContext dialogContext) onActionPressed;
   final Color color;
   final String cancelButtonText;
+  final BuildContext dialogContext;
 
   const _CustomDialogView({
     required this.title,
@@ -77,6 +81,7 @@ class _CustomDialogView extends StatefulWidget {
     required this.onActionPressed,
     required this.color,
     required this.cancelButtonText,
+    required this.dialogContext,
   });
 
   @override
@@ -93,6 +98,13 @@ class _CustomDialogViewState extends State<_CustomDialogView> {
       backgroundColor: theme.colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(SizeConfig.scaleHeight(2.5)),
+        side: Theme.brightnessOf(context) == Brightness.light
+            ? BorderSide.none
+            : BorderSide(
+                color: theme.colorScheme.primary,
+                width: SizeConfig.scaleHeight(0.23),
+                strokeAlign: BorderSide.strokeAlignInside,
+              ),
       ),
       insetPadding: EdgeInsets.symmetric(horizontal: SizeConfig.scaleWidth(8.3)),
       child: Container(
@@ -127,11 +139,27 @@ class _CustomDialogViewState extends State<_CustomDialogView> {
                   child: ActionButton(
                     label: widget.actionButtonText,
                     accentColor: widget.color,
-                    onTap: () {
-                      final bool wasSuccessful = widget.onActionPressed();
+                    onTap: () async {
+                      final navigator = Navigator.of(context);
+
+                      bool wasSuccessful = false;
+                      try {
+                        final FutureOr<bool> result =
+                          widget.onActionPressed(widget.dialogContext);
+
+                        if (result is Future<bool>) {
+                          wasSuccessful = await result;
+                        } else {
+                          wasSuccessful = result;
+                        }
+                      } catch (e) {
+                        wasSuccessful = false;
+                      }
+
+                      if (!mounted) return;
 
                       if (wasSuccessful) {
-                        Navigator.of(context).pop();
+                        navigator.pop(true);
                       }
                     },
                     layout: ButtonLayout.horizontal,

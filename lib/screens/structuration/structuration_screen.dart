@@ -198,9 +198,12 @@ class _StructurationScreenState extends State<StructurationScreen> {
               color: theme.colorScheme.onSurfaceVariant
           ),
         ),
-        onActionPressed: () {
-          _deleteSemester(semesterProvider, semesterId);
-          return true;
+        onActionPressed: (BuildContext dialogContext) async {
+          return await _deleteSemester(
+              semesterProvider,
+              semesterId,
+              dialogContext
+          );
         },
       );
 
@@ -212,30 +215,38 @@ class _StructurationScreenState extends State<StructurationScreen> {
     }
   }
 
-  void _deleteSemester(SemesterProvider provider, int semesterId) async {
+  Future<bool> _deleteSemester(
+      SemesterProvider provider,
+      int semesterId,
+      BuildContext dialogContext
+  ) async {
     try {
       await provider.deleteSemester(semesterId);
 
-      if (mounted) {
+      if (mounted && dialogContext.mounted) {
         CustomToast.show(
-          context: context,
+          context: dialogContext,
           title: 'Semestre eliminado',
           detail: 'El semestre ha sido eliminado exitosamente.',
           type: CustomToastType.success,
           position: ToastPosition.top,
         );
       }
+
+      return true;
     } catch (e) {
-      if (mounted) {
+      if (mounted && dialogContext.mounted) {
         final errorMessage = e.toString().replaceFirst("Exception: ", "");
         CustomToast.show(
-          context: context,
+          context: dialogContext,
           title: 'Error al eliminar el semestre',
           detail: errorMessage,
           type: CustomToastType.error,
           position: ToastPosition.top,
         );
       }
+
+      return false;
     }
   }
 

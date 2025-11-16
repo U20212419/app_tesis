@@ -70,6 +70,7 @@ class AppTheme {
         errorStyle: AppTextStyles.bodyXS().copyWith(
             color: AppColors.supportErrorDark
         ),
+        errorMaxLines: 2,
         filled: false,
         isDense: true,
         contentPadding: EdgeInsets.symmetric(
@@ -179,6 +180,7 @@ class AppTheme {
         errorStyle: AppTextStyles.bodyXS().copyWith(
             color: AppColors.supportErrorDark
         ),
+        errorMaxLines: 2,
         filled: false,
         isDense: true,
         contentPadding: EdgeInsets.symmetric(

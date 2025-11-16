@@ -200,9 +200,8 @@ class _CoursesInSemesterScreenState extends State<CoursesInSemesterScreen> {
               color: theme.colorScheme.onSurfaceVariant
           ),
         ),
-        onActionPressed: () {
-          _removeCourse(courseInSemesterProvider, courseId);
-          return true;
+        onActionPressed: (BuildContext dialogContext) async {
+          return await _removeCourse(courseInSemesterProvider, courseId, dialogContext);
         },
       );
 
@@ -214,7 +213,11 @@ class _CoursesInSemesterScreenState extends State<CoursesInSemesterScreen> {
     }
   }
 
-  void _removeCourse(CourseInSemesterProvider provider, int courseId) async {
+  Future<bool> _removeCourse(
+      CourseInSemesterProvider provider,
+      int courseId,
+      BuildContext dialogContext
+    ) async {
     final semesterProvider = Provider.of<SemesterProvider>(context, listen: false);
     final courseProvider = Provider.of<CourseProvider>(context, listen: false);
 
@@ -226,41 +229,75 @@ class _CoursesInSemesterScreenState extends State<CoursesInSemesterScreen> {
           courseProvider
       );
 
-      if (mounted) {
+      if (mounted && dialogContext.mounted) {
         CustomToast.show(
-          context: context,
+          context: dialogContext,
           title: 'Curso quitado',
           detail: 'El curso ha sido quitado del semestre exitosamente.',
           type: CustomToastType.success,
           position: ToastPosition.top,
         );
       }
+
+      return true;
     } catch (e) {
-      if (mounted) {
+      if (mounted && dialogContext.mounted) {
         final errorMessage = e.toString().replaceFirst("Exception: ", "");
         CustomToast.show(
-          context: context,
+          context: dialogContext,
           title: 'Error al quitar el curso',
           detail: errorMessage,
           type: CustomToastType.error,
           position: ToastPosition.top,
         );
       }
+      return false;
     }
   }
 
-  void _addCourse(CourseInSemesterProvider provider, int? courseId) {
-    if (courseId == null) return;
+  Future<bool> _addCourse(
+      CourseInSemesterProvider provider,
+      int? courseId,
+      BuildContext dialogContext
+  ) async {
+    if (courseId == null) return false;
 
     final semesterProvider = Provider.of<SemesterProvider>(context, listen: false);
     final courseProvider = Provider.of<CourseProvider>(context, listen: false);
 
-    provider.addCourseToSemester(
-        _semesterId,
-        courseId,
-        semesterProvider,
-        courseProvider
-    );
+    try {
+      await provider.addCourseToSemester(
+          _semesterId,
+          courseId,
+          semesterProvider,
+          courseProvider
+      );
+
+      if (mounted && dialogContext.mounted) {
+        CustomToast.show(
+          context: dialogContext,
+          title: 'Curso añadido',
+          detail: 'El curso ha sido añadido al semestre exitosamente.',
+          type: CustomToastType.success,
+          position: ToastPosition.top,
+        );
+      }
+
+      return true;
+    } catch (e) {
+      if (mounted && dialogContext.mounted) {
+        final errorMessage = e.toString().replaceFirst("Exception: ", "");
+        CustomToast.show(
+          context: dialogContext,
+          title: 'Error al añadir el curso',
+          detail: errorMessage,
+          type: CustomToastType.error,
+          position: ToastPosition.top,
+        );
+      }
+
+      return false;
+    }
   }
 
   Map<String, String> _getModeData() {
@@ -421,11 +458,13 @@ class _CoursesInSemesterScreenState extends State<CoursesInSemesterScreen> {
                             );
                           },
                         ),
-                        onActionPressed: () {
+                        onActionPressed: (BuildContext dialogContext) async {
                           if (formKey.currentState!.validate()) {
-                            _addCourse(courseInSemesterProvider,
-                                selectedCourseId);
-                            return true;
+                            return await _addCourse(
+                                courseInSemesterProvider,
+                                selectedCourseId,
+                                dialogContext
+                            );
                           }
                           return false;
                         }

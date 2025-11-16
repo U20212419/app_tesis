@@ -150,7 +150,6 @@ class _CreateAssessmentScreenState extends State<CreateAssessmentScreen> {
                   elevation: 2,
                   isExpanded: true,
                   decoration: const InputDecoration(
-                    errorMaxLines: 2,
                   ),
                   items: [
                     'Examen',
@@ -199,6 +198,15 @@ class _CreateAssessmentScreenState extends State<CreateAssessmentScreen> {
               if (trimmedValue.isEmpty) {
                 return 'Por favor, ingrese un número.';
               }
+
+              final intValue = int.tryParse(trimmedValue);
+
+              if (intValue == null) {
+                return 'Por favor, ingrese un número válido.';
+              }
+              if (intValue <= 0) {
+                return 'El número debe ser mayor que cero.';
+              }
               if (trimmedValue.length > 2) {
                 return 'El número no debe exceder los 2 dígitos.';
               }
@@ -208,22 +216,35 @@ class _CreateAssessmentScreenState extends State<CreateAssessmentScreen> {
           SizedBox(height: SizeConfig.scaleHeight(2.3)),
           // Question amount
           CustomTextField(
-              controller: _questionAmountController,
-              label: 'Cantidad de preguntas',
-              isOptional: true,
-              hintText: 'Ingrese la cantidad de preguntas',
-              keyboardType: TextInputType.number,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-                LengthLimitingTextInputFormatter(2),
-              ],
-              validator: (value) {
-                final trimmedValue = value?.trim() ?? '';
-                if (trimmedValue.length > 2) {
-                  return 'La cantidad de preguntas no debe exceder los 2 dígitos.';
-                }
-                return null;
+            controller: _questionAmountController,
+            label: 'Cantidad de preguntas',
+            isOptional: true,
+            hintText: 'Ingrese la cantidad de preguntas',
+            keyboardType: TextInputType.number,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(2),
+            ],
+            validator: (value) {
+              final trimmedValue = value?.trim() ?? '';
+
+              if (trimmedValue.isEmpty) {
+                return null; // Optional field
               }
+
+              final intValue = int.tryParse(trimmedValue);
+
+              if (intValue == null) {
+                return 'Por favor, ingrese un número válido.';
+              }
+              if (intValue <= 0) {
+                return 'La cantidad de preguntas debe ser mayor que cero.';
+              }
+              if (trimmedValue.length > 2) {
+                return 'La cantidad de preguntas no debe exceder los 2 dígitos.';
+              }
+              return null;
+            }
           ),
         ],
       ),

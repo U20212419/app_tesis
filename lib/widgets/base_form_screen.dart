@@ -50,8 +50,6 @@ class BaseCreationScreen extends StatelessWidget {
             icon: Symbols.cancel_rounded,
             label: 'Cancelar',
             accentColor: AppColors.highlightDarkest,
-            width: SizeConfig.scaleWidth(27.8),
-            height: SizeConfig.scaleHeight(6.2),
             // Custom cancel action
             onTap: onCancel ?? () => Navigator.pop(context),
             layout: ButtonLayout.horizontal,
@@ -60,8 +58,6 @@ class BaseCreationScreen extends StatelessWidget {
             icon: Symbols.save_rounded,
             label: 'Guardar',
             accentColor: AppColors.highlightDarkest,
-            width: SizeConfig.scaleWidth(27.8),
-            height: SizeConfig.scaleHeight(6.2),
             // Custom save action
             onTap: onSave,
             layout: ButtonLayout.horizontal,

@@ -152,7 +152,6 @@ class _CreateSemesterScreenState extends State<CreateSemesterScreen> {
                   elevation: 2,
                   isExpanded: true,
                   decoration: const InputDecoration(
-                    errorMaxLines: 2,
                   ),
                   items: ['0', '1', '2'].map((String value) {
                     return DropdownMenuItem<String>(
