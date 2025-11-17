@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:app_tesis/screens/main_screen.dart';
 import 'package:app_tesis/utils/size_config.dart';
 import 'package:app_tesis/widgets/custom_toast.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +21,8 @@ class ScoresConfirmationScreen extends StatefulWidget {
   final int questionAmount;
   final int assessmentId;
   final int sectionId;
+  final int semesterId;
+  final int courseId;
 
   const ScoresConfirmationScreen({
     super.key,
@@ -25,6 +30,8 @@ class ScoresConfirmationScreen extends StatefulWidget {
     required this.questionAmount,
     required this.assessmentId,
     required this.sectionId,
+    required this.semesterId,
+    required this.courseId,
   });
 
   @override
@@ -236,6 +243,35 @@ class _ScoresConfirmationScreenState extends State<ScoresConfirmationScreen> {
     );
 
     if (didConfirm != true) return; // User cancelled
+
+    if (!mounted) return;
+
+    // Navigate to statistics dashboard
+    final fullStatsData = await _statisticsProvider.fetchStatistics(
+      widget.assessmentId,
+      widget.sectionId,
+    );
+
+    log("Fetched Full Stats Data: ${fullStatsData ?? {}}");
+    log("Stats: ${fullStatsData?['stats'] ?? {}}");
+
+    if (!mounted) return;
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (_) => MainScreen(
+          initialSectionIndex: AppSection.statistics.index,
+          launchDashboardStatsData: {
+            'stats': fullStatsData?['stats'] ?? {},
+            'semesterId': widget.semesterId,
+            'courseId': widget.courseId,
+            'assessmentId': widget.assessmentId,
+            'sectionId': widget.sectionId,
+          },
+        ),
+      ),
+      (route) => false,
+    );
   }
 
   Future<bool> _confirmScores(

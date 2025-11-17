@@ -477,7 +477,7 @@ class _AssessmentsAndSectionsScreenState extends State<AssessmentsAndSectionsScr
     }
   }
 
-  void _navigateToRecording(int assessmentId, int sectionId, int questionAmount) {
+  void _navigateToRecording(int assessmentId, int sectionId, int questionAmount, int semesterId, int courseId) {
     if (!mounted) return;
 
     Navigator.of(context, rootNavigator: true).push(
@@ -486,6 +486,8 @@ class _AssessmentsAndSectionsScreenState extends State<AssessmentsAndSectionsScr
           assessmentId: assessmentId,
           sectionId: sectionId,
           questionAmount: questionAmount,
+          semesterId: semesterId,
+          courseId: courseId,
         ),
       )
     );
@@ -719,7 +721,7 @@ class _AssessmentsAndSectionsScreenState extends State<AssessmentsAndSectionsScr
                     if (finalQuestionAmount != null) {
                       if (mounted) {
                         log('Navigating to RecordingScreen with Assessment ID: $currentAssessmentId and Section ID: $currentSectionId.');
-                        _navigateToRecording(currentAssessmentId, currentSectionId, finalQuestionAmount);
+                        _navigateToRecording(currentAssessmentId, currentSectionId, finalQuestionAmount, widget.semesterId, widget.courseId);
                       }
                     }
                   }

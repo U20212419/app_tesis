@@ -56,6 +56,29 @@ class SemesterService {
     return data.map((json) => Semester.fromJson(json)).toList();
   }
 
+  // Get a semester by ID
+  Future<Semester> getSemesterById(int id) async {
+    final String? token = await GoogleSignInService.getIdToken();
+
+    if (token == null) {
+      throw FirebaseAuthException(
+          code: 'user-token-expired',
+          message: 'No se pudo obtener el token de acceso. Por favor, vuelva a ingresar.'
+      );
+    }
+
+    final response = await _apiService.client.get(
+      '/semesters/$id',
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      ),
+    );
+
+    return Semester.fromJson(response.data);
+  }
+
   // Create a new semester
   Future<Semester> createSemester(String year, String number) async {
     final String? token = await GoogleSignInService.getIdToken();

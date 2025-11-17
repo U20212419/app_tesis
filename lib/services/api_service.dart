@@ -7,7 +7,7 @@ class ApiService {
   ApiService() {
     final baseUrl = dotenv.env['API_BASE_URL'];
     if (baseUrl == null || baseUrl.isEmpty) {
-      throw Exception('API_BASE_URL is not defined in env file.');
+      throw Exception('API_BASE_URL is not defined in .env file.');
     }
 
     _dio = Dio(

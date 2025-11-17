@@ -86,8 +86,9 @@ class StatisticsProvider with ChangeNotifier {
           _latestStats = statsData['stats'] as Map<String, dynamic>?;
           log('Statistics available for assessment $assessmentId, section $sectionId.');
           return true;
+        } else {
+          log('Attempt ${i + 1}/$maxAttempts: Statistics not ready yet for assessment $assessmentId, section $sectionId. Current status: ${statsData['status']}');
         }
-        log('Attempt ${i + 1}/$maxAttempts: Statistics not ready yet for assessment $assessmentId, section $sectionId.');
       } on DioException catch (e) {
         if (e.type == DioExceptionType.badResponse && e.response?.statusCode == 404) {
           log('Attempt ${i + 1}/$maxAttempts: Statistics not ready yet for assessment $assessmentId, section $sectionId.');
@@ -110,6 +111,30 @@ class StatisticsProvider with ChangeNotifier {
     _isPollingActive = false;
   }
 
+  // Fetch statistics
+  Future<Map<String, dynamic>?> fetchStatistics(
+      int assessmentId,
+      int sectionId
+  ) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final stats = await _statsService.getStatistics(assessmentId, sectionId);
+      return stats;
+    } on DioException catch (e) {
+      final errorMessage = ErrorHandler.getApiErrorMessage(e);
+      throw Exception(errorMessage);
+    } catch (e) {
+      final errorMessage = ErrorHandler.getLoginErrorMessage(e);
+      throw Exception(errorMessage);
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Update statistics
   Future<void> updateStatistics(
       int assessmentId,
       int sectionId,
@@ -133,6 +158,7 @@ class StatisticsProvider with ChangeNotifier {
     }
   }
 
+  // Delete statistics
   Future<void> deleteStatistics(int assessmentId, int sectionId) async {
     _isLoading = true;
     notifyListeners();

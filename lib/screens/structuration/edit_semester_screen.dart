@@ -1,16 +1,13 @@
 import 'package:app_tesis/widgets/custom_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/semester.dart';
 import '../../providers/semester_provider.dart';
-import '../../theme/app_colors.dart';
-import '../../theme/app_text_styles.dart';
-import '../../theme/custom_text_field_theme.dart';
 import '../../utils/size_config.dart';
 import '../../widgets/base_form_screen.dart';
+import '../../widgets/custom_dropdown_field.dart';
 import '../../widgets/custom_text_field.dart';
 
 class EditSemesterScreen extends StatefulWidget {
@@ -152,9 +149,6 @@ class _EditSemesterScreenState extends State<EditSemesterScreen> {
   }
 
   Widget _buildForm() {
-    final theme = Theme.of(context);
-    final CustomTextFieldTheme? customTextFieldTheme = theme.extension<CustomTextFieldTheme>();
-
     return Form(
       key: _formKey,
       child: ListView(
@@ -186,63 +180,23 @@ class _EditSemesterScreenState extends State<EditSemesterScreen> {
           ),
           SizedBox(height: SizeConfig.scaleHeight(2.3)),
           // Number (0, 1, 2)
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Número',
-                style: customTextFieldTheme?.fieldNameStyle ?? AppTextStyles.heading5().copyWith(
-                  color: AppColors.neutralDarkDark,
-                ),
-              ),
-              SizedBox(height: SizeConfig.scaleHeight(1.25)),
-              Theme(
-                data: Theme.of(context).copyWith(
-                  splashColor: theme.colorScheme.primary,
-                  highlightColor: theme.colorScheme.primary,
-                ),
-                child: DropdownButtonFormField<String>(
-                  initialValue: _selectedNumber,
-                  hint: Text(
-                    'Seleccione el número de semestre',
-                    style: AppTextStyles.bodyXS().copyWith(
-                      color: theme.inputDecorationTheme.hintStyle?.color ?? AppColors.neutralDarkLightest,
-                    ),
-                  ),
-                  icon: Icon(
-                    Symbols.expand_more_rounded,
-                    size: SizeConfig.scaleHeight(3.1),
-                    color: theme.inputDecorationTheme.hintStyle?.color ?? AppColors.neutralDarkLightest,
-                  ),
-                  dropdownColor: theme.colorScheme.surface,
-                  elevation: 2,
-                  isExpanded: true,
-                  decoration: const InputDecoration(
-                  ),
-                  items: ['0', '1', '2'].map((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _selectedNumber = newValue;
-                    });
-                  },
-                  validator: (value) {
-                    if (value == null) {
-                      return 'Por favor, seleccione un número.';
-                    }
-                    return null;
-                  },
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
-                  style: customTextFieldTheme?.inputTextStyle ?? AppTextStyles.bodyM().copyWith(
-                    color: AppColors.neutralDarkDarkest,
-                  ),
-                ),
-              ),
-            ],
+          CustomDropdownField<String>(
+            label: 'Evaluación',
+            hintText: 'Seleccione una evaluación',
+            value: _selectedNumber,
+            items: ['0', '1', '2'],
+            itemLabel: (number) => number,
+            onChanged: (number) {
+              setState(() {
+                _selectedNumber = number;
+              });
+            },
+            validator: (value) {
+              if (value == null) {
+                return 'Por favor, seleccione un número.';
+              }
+              return null;
+            },
           ),
         ],
       ),

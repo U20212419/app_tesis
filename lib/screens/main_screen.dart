@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:app_tesis/screens/statistics/statistics_dashboard_screen.dart';
 import 'package:app_tesis/screens/statistics/statistics_screen.dart';
 import 'package:app_tesis/screens/structuration/courses_in_semester/assessments_and_sections/assessments_and_sections_screen.dart';
 import 'package:app_tesis/screens/structuration/courses_in_semester/courses_in_semester_screen.dart';
@@ -12,14 +15,29 @@ import 'courses/courses_screen.dart';
 
 enum AppSection { courses, structuration, statistics }
 
+abstract class MainScreenController {
+  void setBottomBarVisibility(bool isVisible);
+  NavigatorState? navigatorFor(AppSection section);
+}
+
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  final int initialSectionIndex;
+  final Map<String, dynamic>? launchDashboardStatsData;
+
+  const MainScreen({
+    super.key,
+    this.initialSectionIndex = 1,
+    this.launchDashboardStatsData,
+  });
+
+  static MainScreenController? of (BuildContext context) =>
+      context.findAncestorStateOfType<_MainScreenState>();
 
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _MainScreenState extends State<MainScreen> implements MainScreenController {
   AppSection _selectedSection = AppSection.structuration;
   final ValueNotifier<bool> _showBottomBar = ValueNotifier(true);
 
@@ -30,6 +48,31 @@ class _MainScreenState extends State<MainScreen> {
   };
 
   int get _selectedIndex => _selectedSection.index;
+  set _selectedIndex(int index) {
+    _selectedSection = AppSection.values[index];
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialSectionIndex;
+    if (widget.launchDashboardStatsData != null) {
+      log("Launching Statistics Dashboard with data: ${widget.launchDashboardStatsData}");
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => StatisticsDashboardScreen(
+              initialStatsData: widget.launchDashboardStatsData!['stats'],
+              semesterId: widget.launchDashboardStatsData!['semesterId'],
+              courseId: widget.launchDashboardStatsData!['courseId'],
+              assessmentId: widget.launchDashboardStatsData!['assessmentId'],
+              sectionId: widget.launchDashboardStatsData!['sectionId'],
+            )
+          )
+        );
+      });
+    }
+  }
 
   void _onItemTapped(AppSection section) {
     if (section == _selectedSection) {
@@ -38,6 +81,11 @@ class _MainScreenState extends State<MainScreen> {
     } else {
       setState(() => _selectedSection = section);
     }
+  }
+
+  @override
+  void setBottomBarVisibility(bool isVisible) {
+    _showBottomBar.value = isVisible;
   }
 
   @override
@@ -83,6 +131,10 @@ class _MainScreenState extends State<MainScreen> {
               courseId: args['courseId'],
               semesterAndCourseCodeNames: args['semesterAndCourseCodeNames'],
             );
+            break;
+          case '/statistics':
+            builder = (BuildContext context) => StatisticsScreen();
+            break;
           case '/':
           default:
             builder = (BuildContext context) => screen;
@@ -138,5 +190,10 @@ class _MainScreenState extends State<MainScreen> {
         ),
       ],
     );
+  }
+
+  @override
+  NavigatorState? navigatorFor(AppSection section) {
+    return _navigatorKeys[section]?.currentState;
   }
 }

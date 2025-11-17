@@ -32,6 +32,29 @@ class AssessmentService {
     return data.map((json) => Assessment.fromJson(json)).toList();
   }
 
+  // Get assessment by ID
+  Future<Assessment> getAssessmentById(int id) async {
+    final String? token = await GoogleSignInService.getIdToken();
+
+    if (token == null) {
+      throw FirebaseAuthException(
+          code: 'user-token-expired',
+          message: 'No se pudo obtener el token de acceso. Por favor, vuelva a ingresar.'
+      );
+    }
+
+    final response = await _apiService.client.get(
+      '/assessments/$id',
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      ),
+    );
+
+    return Assessment.fromJson(response.data);
+  }
+
   // Create a new assessment
   Future<Assessment> createAssessment(
       String type,

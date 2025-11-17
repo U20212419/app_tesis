@@ -12,11 +12,11 @@ import '../../../providers/course_in_semester_provider.dart';
 import '../../../providers/semester_provider.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/app_text_styles.dart';
-import '../../../theme/custom_text_field_theme.dart';
 import '../../../utils/size_config.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/app_divider.dart';
 import '../../../widgets/custom_dialog.dart';
+import '../../../widgets/custom_dropdown_field.dart';
 import '../../../widgets/custom_toast.dart';
 import '../../../widgets/info_card.dart';
 import '../../../widgets/search_app_bar.dart';
@@ -385,7 +385,7 @@ class _CoursesInSemesterScreenState extends State<CoursesInSemesterScreen> {
                       }
 
                       final formKey = GlobalKey<FormState>();
-                      int? selectedCourseId;
+                      Course? selectedCourse;
 
                       // Show dialog to select and add a course
                       showCustomDialog(
@@ -395,63 +395,27 @@ class _CoursesInSemesterScreenState extends State<CoursesInSemesterScreen> {
                         actionButtonText: "Añadir",
                         body: StatefulBuilder(
                           builder: (context, setState) {
-                            final theme = Theme.of(context);
-                            final CustomTextFieldTheme? customTextFieldTheme =
-                              theme.extension<CustomTextFieldTheme>();
-
                             return Form(
                               key: formKey,
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  SizedBox(height: SizeConfig.scaleHeight(1.25)),
-                                  Theme(
-                                    data: Theme.of(context).copyWith(
-                                      splashColor: theme.colorScheme.primary,
-                                      highlightColor: theme.colorScheme.primary,
-                                    ),
-                                    child: DropdownButtonFormField<int>(
-                                      initialValue: selectedCourseId,
-                                      hint: Text(
-                                        'Seleccione un curso',
-                                        style: AppTextStyles.bodyXS().copyWith(
-                                          color: theme.inputDecorationTheme.hintStyle?.color ??
-                                              AppColors.neutralDarkLightest,
-                                        ),
-                                      ),
-                                      icon: Icon(
-                                        Symbols.expand_more_rounded,
-                                        size: SizeConfig.scaleHeight(3.1),
-                                        color: theme.inputDecorationTheme.hintStyle?.color ??
-                                            AppColors.neutralDarkLightest,
-                                      ),
-                                      dropdownColor: theme.colorScheme.surface,
-                                      elevation: 2,
-                                      isExpanded: true,
-                                      decoration: const InputDecoration(
-                                      ),
-                                      items: availableCourses.map((Course course) {
-                                        return DropdownMenuItem<int>(
-                                          value: course.id,
-                                          child: Text('${course.code} - ${course.name}'),
-                                        );
-                                      }).toList(),
-                                      onChanged: (int? newValue) {
-                                        setState(() {
-                                          selectedCourseId = newValue;
-                                        });
-                                      },
-                                      validator: (value) {
-                                        if (value == null) {
-                                          return 'Por favor, seleccione un curso.';
-                                        }
-                                        return null;
-                                      },
-                                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                                      style: customTextFieldTheme?.inputTextStyle ?? AppTextStyles.bodyM().copyWith(
-                                        color: AppColors.neutralDarkDarkest,
-                                      ),
-                                    ),
+                                  CustomDropdownField<Course>(
+                                    hintText: 'Seleccione un curso',
+                                    value: selectedCourse,
+                                    items: availableCourses,
+                                    itemLabel: (course) => '${course.code} - ${course.name}',
+                                    onChanged: (course) {
+                                      setState(() {
+                                        selectedCourse = course;
+                                      });
+                                    },
+                                    validator: (value) {
+                                      if (value == null) {
+                                        return 'Por favor, seleccione un curso.';
+                                      }
+                                      return null;
+                                    },
                                   ),
                                 ],
                               ),
@@ -459,10 +423,15 @@ class _CoursesInSemesterScreenState extends State<CoursesInSemesterScreen> {
                           },
                         ),
                         onActionPressed: (BuildContext dialogContext) async {
-                          if (formKey.currentState!.validate()) {
+                          final isValid = formKey.currentState?.validate() ?? false;
+                          if (!isValid) {
+                            return false;
+                          }
+
+                          if (selectedCourse != null) {
                             return await _addCourse(
                                 courseInSemesterProvider,
-                                selectedCourseId,
+                                selectedCourse!.id,
                                 dialogContext
                             );
                           }

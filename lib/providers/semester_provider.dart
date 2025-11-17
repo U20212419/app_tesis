@@ -65,6 +65,26 @@ class SemesterProvider with ChangeNotifier {
     }
   }
 
+  // Fetch semester by ID
+  Future<Semester?> fetchSemesterById(int id) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final semester = await _semesterService.getSemesterById(id);
+      return semester;
+    } on DioException catch (e) {
+      final errorMessage = ErrorHandler.getApiErrorMessage(e);
+      throw Exception(errorMessage);
+    } catch (e) {
+      final errorMessage = ErrorHandler.getLoginErrorMessage(e);
+      throw Exception(errorMessage);
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   // Add a new semester
   Future<void> addSemester(String year, String number) async {
     _isLoading = true;

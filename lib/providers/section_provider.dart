@@ -39,6 +39,26 @@ class SectionProvider with ChangeNotifier {
     }
   }
 
+  // Fetch section by ID
+  Future<Section> fetchSectionById(int id) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final section = await _sectionService.getSectionById(id);
+      return section;
+    } on DioException catch (e) {
+      final errorMessage = ErrorHandler.getApiErrorMessage(e);
+      throw Exception(errorMessage);
+    } catch (e) {
+      final errorMessage = ErrorHandler.getLoginErrorMessage(e);
+      throw Exception(errorMessage);
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   // Add a new section
   Future<void> addSection(
       String name,

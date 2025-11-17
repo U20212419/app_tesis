@@ -32,6 +32,29 @@ class SectionService {
     return data.map((json) => Section.fromJson(json)).toList();
   }
 
+  // Get section by ID
+  Future<Section> getSectionById(int id) async {
+    final String? token = await GoogleSignInService.getIdToken();
+
+    if (token == null) {
+      throw FirebaseAuthException(
+          code: 'user-token-expired',
+          message: 'No se pudo obtener el token de acceso. Por favor, vuelva a ingresar.'
+      );
+    }
+
+    final response = await _apiService.client.get(
+      '/sections/$id',
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      ),
+    );
+
+    return Section.fromJson(response.data);
+  }
+
   // Create a new section
   Future<Section> createSection(
       String name,

@@ -21,12 +21,16 @@ class RecordingScreen extends StatefulWidget {
   final int assessmentId;
   final int sectionId;
   final int questionAmount;
+  final int semesterId;
+  final int courseId;
 
   const RecordingScreen({
     super.key,
     required this.assessmentId,
     required this.sectionId,
     required this.questionAmount,
+    required this.semesterId,
+    required this.courseId,
   });
 
   @override
@@ -339,6 +343,8 @@ class _RecordingScreenState extends State<RecordingScreen> with WidgetsBindingOb
                       questionAmount: widget.questionAmount,
                       assessmentId: widget.assessmentId,
                       sectionId: widget.sectionId,
+                      semesterId: widget.semesterId,
+                      courseId: widget.courseId,
                     ),
               ),
             );
