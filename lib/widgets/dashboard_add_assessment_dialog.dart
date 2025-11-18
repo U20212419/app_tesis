@@ -46,8 +46,8 @@ Future<void> showDashboardAddAssessmentDialog({
   final assessmentProvider = Provider.of<AssessmentProvider>(dialogContext, listen: false);
   final sectionProvider = Provider.of<SectionProvider>(dialogContext, listen: false);
 
-  await semesterProvider.fetchSemestersDetailed();
-  semesters = semesterProvider.semesters;
+  final semestersList = await semesterProvider.fetchSemestersList();
+  semesters = semestersList;
 
   if (!dialogContext.mounted) return;
 
@@ -87,15 +87,12 @@ Future<void> showDashboardAddAssessmentDialog({
                   if (semester == null) return;
 
                   // Load courses for the selected semester
-                  await courseInSemesterProvider.fetchCoursesInSemester(semester.id);
+                  final coursesList = await courseInSemesterProvider.fetchCoursesInSemesterList(semester.id);
 
                   if (!dialogContext.mounted) return;
 
                   setState(() {
-                    courses = courseInSemesterProvider.courseInSemester
-                        .where((cis) => cis.idSemester == semester.id)
-                        .map((cis) => cis.course)
-                        .toList();
+                    courses = coursesList.map((e) => e.course).toList();
                   });
                 },
                 validator: (value) {
@@ -131,11 +128,11 @@ Future<void> showDashboardAddAssessmentDialog({
                   final courseId = course.id;
 
                   // Load assessments and sections for the selected course and semester
-                  await assessmentProvider.fetchAssessments(
+                  final assessmentsList = await assessmentProvider.fetchAssessmentsList(
                       semesterId,
                       courseId
                   );
-                  await sectionProvider.fetchSections(
+                  final sectionsList = await sectionProvider.fetchSectionsList(
                       semesterId,
                       courseId
                   );
@@ -143,8 +140,8 @@ Future<void> showDashboardAddAssessmentDialog({
                   if (!dialogContext.mounted) return;
 
                   setState(() {
-                    assessments = assessmentProvider.assessments;
-                    sections = sectionProvider.sections;
+                    assessments = assessmentsList;
+                    sections = sectionsList;
                   });
                 },
                 validator: (value) {

@@ -5,10 +5,17 @@ import 'package:app_tesis/services/statistics_service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
+import '../services/api_service.dart';
 import '../utils/error_handler.dart';
 
 class StatisticsProvider with ChangeNotifier {
-  final StatisticsService _statsService = StatisticsService();
+  final ApiService _apiService;
+
+  late final StatisticsService _statsService;
+
+  StatisticsProvider(this._apiService) {
+    _statsService = StatisticsService(_apiService);
+  }
 
   bool _isLoading = false;
   bool _isPollingActive = false;

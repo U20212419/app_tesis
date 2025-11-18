@@ -8,7 +8,9 @@ import '../auth/google_sign_in_service.dart';
 import 'api_service.dart';
 
 class StatisticsService {
-  final ApiService _apiService = ApiService();
+  final ApiService _apiService;
+
+  StatisticsService(this._apiService);
 
   Future<Map<String, String>> _getUploadUrl(String fileName) async {
     final String? token = await GoogleSignInService.getIdToken();

@@ -6,7 +6,9 @@ import 'api_service.dart';
 import '../models/course.dart';
 
 class CourseService {
-  final ApiService _apiService = ApiService();
+  final ApiService _apiService;
+
+  CourseService(this._apiService);
 
   // Get all courses
   Future<List<Course>> getCourses() async {

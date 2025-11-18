@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import '../auth/auth_gate.dart';
 import '../auth/google_sign_in_service.dart';
@@ -26,10 +25,6 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _initializeAppAndNavigate() async {
     try {
-      final isRelease = kReleaseMode; // True when flutter build, false when run
-      final fileName = isRelease ? '.env.production' : '.env.development';
-      await dotenv.load(fileName: fileName);
-
       await Firebase.initializeApp();
 
       if (kDebugMode) {

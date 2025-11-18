@@ -74,6 +74,8 @@ class ErrorHandler {
         return 'Ya existe un semestre con el año y número ingresados.';
       case 'ERR_COURSE_ALREADY_IN_SEMESTER':
         return 'El curso ya ha sido añadido al semestre seleccionado.';
+      case 'ERR_QUESTION_AMOUNT_MISSING':
+        return 'La cantidad de preguntas para la evaluación no está establecida.';
 
       // Generic errors
       case 'ERR_AUTHENTICATION':

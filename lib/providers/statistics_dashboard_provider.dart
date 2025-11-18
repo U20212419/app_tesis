@@ -4,14 +4,29 @@ import 'package:app_tesis/providers/semester_provider.dart';
 import 'package:app_tesis/providers/statistics_provider.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../models/statistics_data.dart';
 import '../utils/error_handler.dart';
 import 'assessment_provider.dart';
-import 'course_in_semester_provider.dart';
+import 'course_provider.dart';
 
 class StatisticsDashboardProvider with ChangeNotifier {
+  late StatisticsProvider statisticsProvider;
+  late SemesterProvider semesterProvider;
+  late CourseProvider courseProvider;
+  late AssessmentProvider assessmentProvider;
+  late SectionProvider sectionProvider;
+
+  StatisticsDashboardProvider(
+    this.statisticsProvider,
+    this.semesterProvider,
+    this.courseProvider,
+    this.assessmentProvider,
+    this.sectionProvider,
+  );
+
+  StatisticsDashboardProvider.empty();
+
   List<StatisticsData> _statsList = [];
   List<StatisticsData> get statsList => _statsList;
 
@@ -41,31 +56,15 @@ class StatisticsDashboardProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final statsProvider = Provider.of<StatisticsProvider>(context, listen: false);
-      final semesterProvider = Provider.of<SemesterProvider>(context, listen: false);
-      final courseInSemesterProvider = Provider.of<CourseInSemesterProvider>(context, listen: false);
-      final assessmentProvider = Provider.of<AssessmentProvider>(context, listen: false);
-      final sectionProvider = Provider.of<SectionProvider>(context, listen: false);
-
-      final statsData = await statsProvider.fetchStatistics(
+      final statsData = await statisticsProvider.fetchStatistics(
         assessmentId,
         sectionId,
       );
 
-      await semesterProvider.fetchSemestersDetailed();
-      final semester = semesterProvider.semesters.firstWhere((s) =>
-      s.id == semesterId);
-      await courseInSemesterProvider.fetchCoursesInSemester(semesterId);
-      final course = courseInSemesterProvider.courseInSemester
-          .firstWhere((cis) =>
-      cis.idSemester == semesterId && cis.course.id == courseId)
-          .course;
-      await assessmentProvider.fetchAssessments(semesterId, courseId);
-      final assessment = assessmentProvider.assessments
-          .firstWhere((a) => a.id == assessmentId);
-      await sectionProvider.fetchSections(semesterId, courseId);
-      final section = sectionProvider.sections
-          .firstWhere((s) => s.id == sectionId);
+      final semester = await semesterProvider.fetchSemesterById(semesterId);
+      final course = await courseProvider.fetchCourseById(courseId);
+      final assessment = await assessmentProvider.fetchAssessmentById(assessmentId);
+      final section = await sectionProvider.fetchSectionById(sectionId);
 
       final String semesterName = '${semester.year}-${semester.number}';
       final String courseName = '${course.code} - ${course.name}';

@@ -4,11 +4,18 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 import '../models/semester.dart';
+import '../services/api_service.dart';
 import '../services/semester_service.dart';
 import '../utils/error_handler.dart';
 
 class SemesterProvider with ChangeNotifier {
-  final SemesterService _semesterService = SemesterService();
+  final ApiService _apiService;
+
+  late final SemesterService _semesterService;
+
+  SemesterProvider(this._apiService) {
+    _semesterService = SemesterService(_apiService);
+  }
 
   List<Semester> _semesters = [];
   bool _isLoading = false;
@@ -46,6 +53,26 @@ class SemesterProvider with ChangeNotifier {
     }
   }
 
+  // Fetch all semesters returning the list
+  Future<List<Semester>> fetchSemestersList() async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final semesters = await _semesterService.getSemesters();
+      return semesters;
+    } on DioException catch (e) {
+      final errorMessage = ErrorHandler.getApiErrorMessage(e);
+      throw Exception(errorMessage);
+    } catch (e) {
+      final errorMessage = ErrorHandler.getLoginErrorMessage(e);
+      throw Exception(errorMessage);
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   // Fetch all semesters with the amount of courses in each semester
   Future<void> fetchSemestersDetailed() async {
     _isLoading = true;
@@ -66,7 +93,7 @@ class SemesterProvider with ChangeNotifier {
   }
 
   // Fetch semester by ID
-  Future<Semester?> fetchSemesterById(int id) async {
+  Future<Semester> fetchSemesterById(int id) async {
     _isLoading = true;
     notifyListeners();
 

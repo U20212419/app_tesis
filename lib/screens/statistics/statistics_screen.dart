@@ -30,7 +30,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
         if (!mounted) return null;
 
-
         log(
             "Selected IDs - Semester: $semesterId, Course: $courseId, Assessment: $assessmentId, Section: $sectionId");
 

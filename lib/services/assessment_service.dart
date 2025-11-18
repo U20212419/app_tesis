@@ -6,7 +6,9 @@ import '../models/assessment.dart';
 import 'api_service.dart';
 
 class AssessmentService {
-  final ApiService _apiService = ApiService();
+  final ApiService _apiService;
+
+  AssessmentService(this._apiService);
 
   // Get all assessments for a specific course in a specific semester
   Future<List<Assessment>> getAssessments(int idSemester, int idCourse) async {

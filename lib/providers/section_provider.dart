@@ -4,10 +4,17 @@ import 'package:app_tesis/services/section_service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
+import '../services/api_service.dart';
 import '../utils/error_handler.dart';
 
 class SectionProvider with ChangeNotifier {
-  final SectionService _sectionService = SectionService();
+  final ApiService _apiService;
+
+  late final SectionService _sectionService;
+
+  SectionProvider(this._apiService) {
+    _sectionService = SectionService(_apiService);
+  }
 
   List<Section> _sections = [];
   bool _isLoading = false;
@@ -27,6 +34,26 @@ class SectionProvider with ChangeNotifier {
 
     try {
       _sections = await _sectionService.getSections(idSemester, idCourse);
+    } on DioException catch (e) {
+      final errorMessage = ErrorHandler.getApiErrorMessage(e);
+      throw Exception(errorMessage);
+    } catch (e) {
+      final errorMessage = ErrorHandler.getLoginErrorMessage(e);
+      throw Exception(errorMessage);
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Fetch all sections for a specific course in a specific semester returning the list
+  Future<List<Section>> fetchSectionsList(int idSemester, int idCourse) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final sections = await _sectionService.getSections(idSemester, idCourse);
+      return sections;
     } on DioException catch (e) {
       final errorMessage = ErrorHandler.getApiErrorMessage(e);
       throw Exception(errorMessage);

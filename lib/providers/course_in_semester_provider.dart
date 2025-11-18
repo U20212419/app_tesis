@@ -6,11 +6,18 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 import '../models/course_in_semester.dart';
+import '../services/api_service.dart';
 import '../services/course_in_semester_service.dart';
 import '../utils/error_handler.dart';
 
 class CourseInSemesterProvider with ChangeNotifier {
-  final CourseInSemesterService _courseInSemesterService = CourseInSemesterService();
+  final ApiService _apiService;
+
+  late final CourseInSemesterService _courseInSemesterService;
+
+  CourseInSemesterProvider(this._apiService) {
+    _courseInSemesterService = CourseInSemesterService(_apiService);
+  }
 
   List<CourseInSemester> _coursesInSemester = [];
   bool _isLoading = false;
@@ -75,6 +82,26 @@ class CourseInSemesterProvider with ChangeNotifier {
 
     try {
       _coursesInSemester = await _courseInSemesterService.getCoursesInSemester(idSemester);
+    } on DioException catch (e) {
+      final errorMessage = ErrorHandler.getApiErrorMessage(e);
+      throw Exception(errorMessage);
+    } catch (e) {
+      final errorMessage = ErrorHandler.getLoginErrorMessage(e);
+      throw Exception(errorMessage);
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Fetch all courses in a specific semester returning the list
+  Future<List<CourseInSemester>> fetchCoursesInSemesterList(int idSemester) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final coursesInSemester = await _courseInSemesterService.getCoursesInSemester(idSemester);
+      return coursesInSemester;
     } on DioException catch (e) {
       final errorMessage = ErrorHandler.getApiErrorMessage(e);
       throw Exception(errorMessage);

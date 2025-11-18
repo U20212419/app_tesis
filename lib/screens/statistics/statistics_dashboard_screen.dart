@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:app_tesis/widgets/custom_toast.dart';
 import 'package:app_tesis/widgets/dashboard_add_assessment_dialog.dart';
@@ -6,7 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
+import '../../models/assessment.dart';
 import '../../models/assessment_section_id.dart';
+import '../../models/course.dart';
+import '../../models/section.dart';
+import '../../models/semester.dart';
 import '../../models/statistics_data.dart';
 import '../../providers/assessment_provider.dart';
 import '../../providers/course_provider.dart';
@@ -58,23 +61,33 @@ class _StatisticsDashboardScreenState extends State<StatisticsDashboardScreen> {
     final assessmentProvider = Provider.of<AssessmentProvider>(context, listen: false);
     final sectionProvider = Provider.of<SectionProvider>(context, listen: false);
 
-    final semester = await semesterProvider.fetchSemesterById(widget.semesterId);
-    final course = await courseProvider.fetchCourseById(widget.courseId);
-    final assessment = await assessmentProvider.fetchAssessmentById(widget.assessmentId);
-    final section = await sectionProvider.fetchSectionById(widget.sectionId);
+    late Semester semester;
+    late Course course;
+    late Assessment assessment;
+    late Section section;
 
-    if (!mounted) return;
-
-    if (semester == null || course == null || assessment == null || section == null) {
-      CustomToast.show(
-        context: context,
-        title: 'Error al cargar datos',
-        detail: 'No se pudieron cargar los datos para el dashboard de estadísticas.',
-        type: CustomToastType.error,
-        position: ToastPosition.top,
-      );
+    try {
+      semester = await semesterProvider.fetchSemesterById(
+          widget.semesterId);
+      course = await courseProvider.fetchCourseById(widget.courseId);
+      assessment = await assessmentProvider.fetchAssessmentById(
+          widget.assessmentId);
+      section = await sectionProvider.fetchSectionById(widget.sectionId);
+    } catch (e) {
+      if (mounted) {
+        final errorMessage = e.toString().replaceFirst("Exception: ", "");
+        CustomToast.show(
+          context: context,
+          title: 'Error al cargar datos iniciales',
+          detail: errorMessage,
+          type: CustomToastType.error,
+          position: ToastPosition.top,
+        );
+      }
       return;
     }
+
+    if (!mounted) return;
 
     final initialData = StatisticsData(
       semesterName: '${semester.year}-${semester.number}',

@@ -4,11 +4,18 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 import '../models/course.dart';
+import '../services/api_service.dart';
 import '../services/course_service.dart';
 import '../utils/error_handler.dart';
 
 class CourseProvider with ChangeNotifier {
-  final CourseService _courseService = CourseService();
+  final ApiService _apiService;
+
+  late final CourseService _courseService;
+
+  CourseProvider(this._apiService) {
+    _courseService = CourseService(_apiService);
+  }
 
   List<Course> _courses = [];
   bool _isLoading = false;
@@ -66,7 +73,7 @@ class CourseProvider with ChangeNotifier {
   }
 
   // Fetch course by ID
-  Future<Course?> fetchCourseById(int id) async {
+  Future<Course> fetchCourseById(int id) async {
     _isLoading = true;
     notifyListeners();
 

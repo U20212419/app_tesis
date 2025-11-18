@@ -3,11 +3,18 @@ import 'package:app_tesis/providers/course_in_semester_provider.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
+import '../services/api_service.dart';
 import '../services/assessment_service.dart';
 import '../utils/error_handler.dart';
 
 class AssessmentProvider with ChangeNotifier {
-  final AssessmentService _assessmentService = AssessmentService();
+  final ApiService _apiService;
+
+  late final AssessmentService _assessmentService;
+
+  AssessmentProvider(this._apiService) {
+    _assessmentService = AssessmentService(_apiService);
+  }
 
   List<Assessment> _assessments = [];
   bool _isLoading = false;
@@ -27,6 +34,26 @@ class AssessmentProvider with ChangeNotifier {
 
     try {
       _assessments = await _assessmentService.getAssessments(idSemester, idCourse);
+    } on DioException catch (e) {
+      final errorMessage = ErrorHandler.getApiErrorMessage(e);
+      throw Exception(errorMessage);
+    } catch (e) {
+      final errorMessage = ErrorHandler.getLoginErrorMessage(e);
+      throw Exception(errorMessage);
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Fetch all assessments for a specific course in a specific semester returning the list
+  Future<List<Assessment>> fetchAssessmentsList(int idSemester, int idCourse) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final assessments = await _assessmentService.getAssessments(idSemester, idCourse);
+      return assessments;
     } on DioException catch (e) {
       final errorMessage = ErrorHandler.getApiErrorMessage(e);
       throw Exception(errorMessage);

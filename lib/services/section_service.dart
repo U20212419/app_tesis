@@ -6,7 +6,9 @@ import '../auth/google_sign_in_service.dart';
 import 'api_service.dart';
 
 class SectionService {
-  final ApiService _apiService = ApiService();
+  final ApiService _apiService;
+
+  SectionService(this._apiService);
 
   // Get all sections for a specific course in a specific semester
   Future<List<Section>> getSections(int idSemester, int idCourse) async {
