@@ -171,9 +171,17 @@ class _StatisticsDashboardScreenState extends State<StatisticsDashboardScreen> {
     );
   }
 
+  void _handleCleanUp() {
+    Future.microtask(() {
+      if (mounted) {
+        _dashboardProvider.clearStats();
+      }
+    });
+  }
+
   void _goBackToStatisticsSection() {
-    _dashboardProvider.clearStats();
     Navigator.of(context).pop();
+    _handleCleanUp();
   }
 
   Excel _generateExcel(List<StatisticsData> statsList) {
@@ -435,8 +443,10 @@ class _StatisticsDashboardScreenState extends State<StatisticsDashboardScreen> {
 
     return PopScope(
       onPopInvokedWithResult: (didPop, result) async {
-        if (didPop) {
+        if (!didPop) {
           _goBackToStatisticsSection();
+        } else {
+          _handleCleanUp();
         }
       },
       child: Scaffold(
@@ -509,6 +519,13 @@ class _StatisticsDashboardScreenState extends State<StatisticsDashboardScreen> {
 }
 
 Widget _buildDashboardBody(List<StatisticsData> statsList) {
+  if (statsList.isEmpty) {
+    return const Center(
+        child: CircularProgressIndicator(
+          color: AppColors.highlightDarkest,
+        )
+    );
+  }
   return Column(
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
