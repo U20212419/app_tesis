@@ -17,8 +17,6 @@ class StatsBannerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     final Map<String, dynamic> aggStats = statsData.stats['statistics'] ?? {};
     final int count = (aggStats['count'] as num?)?.toInt() ?? 0;
     final double mean = (aggStats['mean'] as num?)?.toDouble() ?? 0.0;
@@ -28,6 +26,12 @@ class StatsBannerCard extends StatelessWidget {
     final double max = (aggStats['max'] as num?)?.toDouble() ?? 0.0;
 
     return Card(
+      margin: EdgeInsets.fromLTRB(
+        SizeConfig.scaleWidth(4.2),
+        SizeConfig.scaleHeight(2.3),
+        SizeConfig.scaleWidth(4.2),
+        SizeConfig.scaleHeight(0),
+      ),
       color: color,
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -44,32 +48,32 @@ class StatsBannerCard extends StatelessWidget {
             Text(
               'Estadísticas Generales',
               style: AppTextStyles.heading4().copyWith(
-                  color: theme.colorScheme.onSurface,
+                  color: AppColors.neutralDarkDarkest,
               ),
             ),
             SizedBox(height: SizeConfig.scaleHeight(0.6)),
             Text(
-              '${statsData.semesterName} | ${statsData.courseName}\n${statsData.assessmentName} | ${statsData.sectionName}',
+              '${statsData.semesterName}\n${statsData.courseName}\n${statsData.assessmentName} | ${statsData.sectionName}',
               style: AppTextStyles.actionS().copyWith(
-                  color: theme.colorScheme.onSurfaceVariant
+                  color: AppColors.neutralDarkLight,
               ),
             ),
             SizedBox(height: SizeConfig.scaleHeight(0.6)),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildStatColumn(context, "Cantidad", count.toString()),
-                _buildStatColumn(context, "Media", mean.toStringAsFixed(2)),
-                _buildStatColumn(context, "Mediana", median.toStringAsFixed(2)),
+                Expanded(child: _buildStatColumn(context, "Cantidad", count.toString())),
+                Expanded(child: _buildStatColumn(context, "Media", mean.toStringAsFixed(2))),
+                Expanded(child: _buildStatColumn(context, "Mediana", median.toStringAsFixed(2))),
               ],
             ),
             SizedBox(height: SizeConfig.scaleHeight(0.6)),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildStatColumn(context, "Desv. Est.", stdDev.toStringAsFixed(2)),
-                _buildStatColumn(context, "Mínimo", min.toStringAsFixed(0)),
-                _buildStatColumn(context, "Máximo", max.toStringAsFixed(0)),
+                Expanded(child: _buildStatColumn(context, "Desv. Est.", stdDev.toStringAsFixed(2))),
+                Expanded(child: _buildStatColumn(context, "Mínimo", min.toStringAsFixed(2))),
+                Expanded(child: _buildStatColumn(context, "Máximo", max.toStringAsFixed(2))),
               ],
             ),
           ],
@@ -85,17 +89,13 @@ class StatsBannerCard extends StatelessWidget {
         Text(
           label,
           style: AppTextStyles.bodyS().copyWith(
-              color: Theme.brightnessOf(context) == Brightness.light
-                  ? AppColors.neutralDarkMedium
-                  : AppColors.neutralLightMedium
+              color: AppColors.neutralDarkMedium
           ),
         ),
         Text(
           value,
           style: AppTextStyles.bodyS().copyWith(
-              color: Theme.brightnessOf(context) == Brightness.light
-                  ? AppColors.neutralDarkMedium
-                  : AppColors.neutralLightMedium
+              color: AppColors.neutralDarkMedium
           ),
         ),
       ],

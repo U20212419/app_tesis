@@ -44,7 +44,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             sectionId,
           );
 
-          log("Fetched Stats Data: ${statsData?['stats'] ?? {}}");
+          //log("Fetched Stats Data: ${statsData?['stats'] ?? {}}");
 
           return statsData;
         } catch (e) {

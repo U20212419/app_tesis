@@ -43,6 +43,9 @@ class _RecordingScreenState extends State<RecordingScreen> with WidgetsBindingOb
   bool _isRecording = false;
   bool _isProcessing = false;
 
+  final Stopwatch _recordingStopwatch = Stopwatch();
+  final List<int> _capturedFrameTimestamps = [];
+
   late StatisticsProvider _statisticsProvider;
   bool _isInit = true;
 
@@ -150,7 +153,7 @@ class _RecordingScreenState extends State<RecordingScreen> with WidgetsBindingOb
 
       _controller = CameraController(
         backCamera,
-        ResolutionPreset.high, // High resolution (720p)
+        ResolutionPreset.veryHigh, // Very high resolution (1080p)
         imageFormatGroup: ImageFormatGroup.yuv420,
         enableAudio: false,
       );
@@ -184,6 +187,10 @@ class _RecordingScreenState extends State<RecordingScreen> with WidgetsBindingOb
     if (_isRecording || !_isCameraReady) return;
 
     try {
+      _capturedFrameTimestamps.clear();
+      _recordingStopwatch.reset();
+      _recordingStopwatch.start();
+
       await _controller!.startVideoRecording();
       setState(() {
         _isRecording = true;
@@ -209,6 +216,8 @@ class _RecordingScreenState extends State<RecordingScreen> with WidgetsBindingOb
     if (!_isRecording) return;
 
     try {
+      _recordingStopwatch.stop();
+
       final XFile videoFile = await _controller!.stopVideoRecording();
 
       setState(() {
@@ -236,6 +245,8 @@ class _RecordingScreenState extends State<RecordingScreen> with WidgetsBindingOb
     final navigator = Navigator.of(context);
 
     if (_isRecording && _controller != null) {
+      _recordingStopwatch.stop();
+
       final XFile file = await _controller!.stopVideoRecording();
 
       setState(() {
@@ -245,6 +256,25 @@ class _RecordingScreenState extends State<RecordingScreen> with WidgetsBindingOb
       await _deleteVideoFile(file);
     }
     navigator.pop();
+  }
+
+  void _onCaptureFramePressed() {
+    if (!_isRecording) return;
+
+    // Capture the current timestamp in milliseconds since recording started
+    final int currentMs = _recordingStopwatch.elapsedMilliseconds;
+    _capturedFrameTimestamps.add(currentMs);
+
+    log('Captured frame at ${currentMs}ms. Total captured frames: ${_capturedFrameTimestamps.length}');
+
+    CustomToast.show(
+      context: context,
+      title: 'Frame capturado',
+      detail: 'Marca de tiempo: $currentMs ms',
+      type: CustomToastType.info,
+      duration: const Duration(seconds: 1),
+      position: ToastPosition.bottom,
+    );
   }
 
   Future<bool?> _showConfirmationModal(XFile videoFile) async {
@@ -287,6 +317,9 @@ class _RecordingScreenState extends State<RecordingScreen> with WidgetsBindingOb
         assessmentId: widget.assessmentId,
         sectionId: widget.sectionId,
         questionAmount: widget.questionAmount,
+        framesIndexes: _capturedFrameTimestamps.isNotEmpty
+            ? _capturedFrameTimestamps
+            : null,
       );
 
       if (success) {
@@ -424,8 +457,15 @@ class _RecordingScreenState extends State<RecordingScreen> with WidgetsBindingOb
             horizontal: SizeConfig.scaleWidth(5.6),
           ),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
+              ActionButton(
+                icon: Symbols.camera_rounded,
+                label: 'Capturar',
+                accentColor: AppColors.highlightDarkest,
+                onTap: _onCaptureFramePressed,
+                layout: ButtonLayout.vertical,
+              ),
               ActionButton(
                 icon: Symbols.photo_camera_rounded,
                 label: 'Detener',

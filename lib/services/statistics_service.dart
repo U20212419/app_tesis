@@ -64,7 +64,8 @@ class StatisticsService {
       String downloadUrl,
       int assessmentId,
       int sectionId,
-      int questionAmount
+      int questionAmount,
+      List<int>? framesIndexes
   ) async {
     final String? token = await GoogleSignInService.getIdToken();
 
@@ -88,6 +89,7 @@ class StatisticsService {
         'id_assessment': assessmentId,
         'id_section': sectionId,
         'question_amount': questionAmount,
+        'frames_indexes': framesIndexes,
       }
     );
     log('Video processing triggered successfully.');
@@ -98,7 +100,8 @@ class StatisticsService {
     required String fileName,
     required int assessmentId,
     required int sectionId,
-    required int questionAmount
+    required int questionAmount,
+    List<int>? framesIndexes
   }) async {
     // Get pre-signed upload and download URLs
     final urls = await _getUploadUrl(fileName);
@@ -109,7 +112,7 @@ class StatisticsService {
     await _uploadVideoToS3(uploadUrl, videoFile);
 
     // Notify backend to start processing
-    await _triggerProcessing(downloadUrl, assessmentId, sectionId, questionAmount);
+    await _triggerProcessing(downloadUrl, assessmentId, sectionId, questionAmount, framesIndexes);
   }
 
   // Fetch statistics for a given assessment and section
@@ -132,7 +135,7 @@ class StatisticsService {
         },
       ),
     );
-    log('Received statistics response: ${response.data}');
+    //log('Received statistics response: ${response.data}');
 
     return response.data as Map<String, dynamic>;
   }

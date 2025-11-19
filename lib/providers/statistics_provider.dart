@@ -34,6 +34,7 @@ class StatisticsProvider with ChangeNotifier {
     required int assessmentId,
     required int sectionId,
     required int questionAmount,
+    List<int>? framesIndexes
   }) async {
     _isLoading = true;
     _latestStats = null;
@@ -47,6 +48,7 @@ class StatisticsProvider with ChangeNotifier {
         assessmentId: assessmentId,
         sectionId: sectionId,
         questionAmount: questionAmount,
+        framesIndexes: framesIndexes,
       );
 
       if (!_isPollingActive) {

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:app_tesis/models/assessment_section_id.dart';
 import 'package:app_tesis/theme/app_colors.dart';
@@ -219,8 +218,6 @@ Future<void> showDashboardAddAssessmentDialog({
           'assessmentId': selectedAssessment!.id,
           'sectionId': selectedSection!.id,
         });
-
-        log("Stats Data Returned: $statsData");
 
         if (statsData != null && statsData.containsKey('error')) {
           // An error occurred, do not close the dialog
