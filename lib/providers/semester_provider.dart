@@ -7,6 +7,8 @@ import '../models/semester.dart';
 import '../services/api_service.dart';
 import '../services/semester_service.dart';
 import '../utils/error_handler.dart';
+import 'course_in_semester_provider.dart';
+import 'course_provider.dart';
 
 class SemesterProvider with ChangeNotifier {
   final ApiService _apiService;
@@ -31,6 +33,20 @@ class SemesterProvider with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       log('Error updating course count: $e');
+    }
+  }
+
+  // Decrement the course count by 1
+  void decrementCourseCount(int semesterId) {
+    try {
+      final index = _semesters.indexWhere((sem) => sem.id == semesterId);
+
+      if (index != -1 && _semesters[index].courseCount != null) {
+        _semesters[index].courseCount = _semesters[index].courseCount! - 1;
+        notifyListeners();
+      }
+    } catch (e) {
+      log('Error decrementing course count: $e');
     }
   }
 
@@ -157,13 +173,25 @@ class SemesterProvider with ChangeNotifier {
   }
 
   // Soft delete an existing semester
-  Future<void> deleteSemester(int id) async {
+  Future<void> deleteSemester(
+      int id,
+      CourseProvider courseProvider,
+      CourseInSemesterProvider courseInSemesterProvider
+  ) async {
     _isLoading = true;
     notifyListeners();
 
     try {
+      final coursesInSemesters = await courseInSemesterProvider.fetchCoursesInSemesters();
+      final affectedCourseIds = coursesInSemesters
+          .where((cis) => cis.idSemester == id)
+          .map((cis) => cis.course.id)
+          .toSet();
       await _semesterService.deleteSemester(id);
       _semesters.removeWhere((semester) => semester.id == id);
+      for (final courseId in affectedCourseIds) {
+        courseProvider.decrementSemesterCount(courseId);
+      }
     } on DioException catch (e) {
       final errorMessage = ErrorHandler.getApiErrorMessage(e);
       throw Exception(errorMessage);

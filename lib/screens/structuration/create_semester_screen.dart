@@ -114,8 +114,8 @@ class _CreateSemesterScreenState extends State<CreateSemesterScreen> {
           SizedBox(height: SizeConfig.scaleHeight(2.3)),
           // Number (0, 1, 2)
           CustomDropdownField<String>(
-            label: 'Evaluación',
-            hintText: 'Seleccione una evaluación',
+            label: 'Número',
+            hintText: 'Seleccione un número',
             value: _selectedNumber,
             items: ['0', '1', '2'],
             itemLabel: (number) => number,

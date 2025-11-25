@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:app_tesis/providers/course_in_semester_provider.dart';
 import 'package:app_tesis/screens/structuration/create_semester_screen.dart';
 import 'package:app_tesis/screens/structuration/edit_semester_screen.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../models/semester.dart';
+import '../../providers/course_provider.dart';
 import '../../providers/semester_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_text_styles.dart';
@@ -220,8 +222,11 @@ class _StructurationScreenState extends State<StructurationScreen> {
       int semesterId,
       BuildContext dialogContext
   ) async {
+    final courseProvider = Provider.of<CourseProvider>(context, listen: false);
+    final courseInSemesterProvider = Provider.of<CourseInSemesterProvider>(context, listen: false);
+
     try {
-      await provider.deleteSemester(semesterId);
+      await provider.deleteSemester(semesterId, courseProvider, courseInSemesterProvider);
 
       if (mounted && dialogContext.mounted) {
         CustomToast.show(

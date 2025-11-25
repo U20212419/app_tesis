@@ -57,12 +57,12 @@ class CourseInSemesterProvider with ChangeNotifier {
   }
 
   // Fetch all courses in all semesters
-  Future<void> fetchCoursesInSemesters() async {
+  Future<List<CourseInSemester>> fetchCoursesInSemesters() async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      _coursesInSemester = await _courseInSemesterService.getCoursesInSemesters();
+      return await _courseInSemesterService.getCoursesInSemesters();
     } on DioException catch (e) {
       final errorMessage = ErrorHandler.getApiErrorMessage(e);
       throw Exception(errorMessage);

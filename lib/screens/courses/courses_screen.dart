@@ -10,7 +10,9 @@ import 'package:provider/provider.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../models/course.dart';
+import '../../providers/course_in_semester_provider.dart';
 import '../../providers/course_provider.dart';
+import '../../providers/semester_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../utils/size_config.dart';
 import '../../widgets/app_divider.dart';
@@ -202,8 +204,11 @@ class _CoursesScreenState extends State<CoursesScreen> {
       int courseId,
       BuildContext dialogContext
   ) async {
+    final semesterProvider = Provider.of<SemesterProvider>(context, listen: false);
+    final courseInSemesterProvider = Provider.of<CourseInSemesterProvider>(context, listen: false);
+
     try {
-      await provider.deleteCourse(courseId);
+      await provider.deleteCourse(courseId, semesterProvider, courseInSemesterProvider);
 
       if (mounted && dialogContext.mounted) {
         CustomToast.show(

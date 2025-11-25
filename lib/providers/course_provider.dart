@@ -1,5 +1,7 @@
 import 'dart:developer';
 
+import 'package:app_tesis/providers/course_in_semester_provider.dart';
+import 'package:app_tesis/providers/semester_provider.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
@@ -31,6 +33,20 @@ class CourseProvider with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       log('Error updating semester count: $e');
+    }
+  }
+
+  // Decrement the semester count by 1
+  void decrementSemesterCount(int courseId) {
+    try {
+      final index = _courses.indexWhere((c) => c.id == courseId);
+
+      if (index != -1 && _courses[index].semesterCount != null) {
+        _courses[index].semesterCount = _courses[index].semesterCount! - 1;
+        notifyListeners();
+      }
+    } catch (e) {
+      log('Error decrementing semester count: $e');
     }
   }
 
@@ -136,13 +152,25 @@ class CourseProvider with ChangeNotifier {
   }
 
   // Soft delete an existing course
-  Future<void> deleteCourse(int id) async {
+  Future<void> deleteCourse(
+      int id,
+      SemesterProvider semesterProvider,
+      CourseInSemesterProvider courseInSemesterProvider
+  ) async {
     _isLoading = true;
     notifyListeners();
 
     try {
+      final coursesInSemesters = await courseInSemesterProvider.fetchCoursesInSemesters();
+      final affectedSemesterIds = coursesInSemesters
+          .where((cis) => cis.course.id == id)
+          .map((cis) => cis.idSemester)
+          .toSet();
       await _courseService.deleteCourse(id);
       _courses.removeWhere((course) => course.id == id);
+      for (final semesterId in affectedSemesterIds) {
+        semesterProvider.decrementCourseCount(semesterId);
+      }
     } on DioException catch (e) {
       final errorMessage = ErrorHandler.getApiErrorMessage(e);
       throw Exception(errorMessage);
