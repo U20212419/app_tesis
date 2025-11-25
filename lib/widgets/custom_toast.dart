@@ -139,9 +139,13 @@ class _ToastAnimatorState extends State<_ToastAnimator>
             ? Alignment.topCenter
             : Alignment.bottomCenter,
         child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: SizeConfig.scaleWidth(4.4),
-            vertical: SizeConfig.scaleHeight(2.5),
+          padding: EdgeInsets.only(
+            left: SizeConfig.scaleWidth(4.4),
+            right: SizeConfig.scaleWidth(4.4),
+            top: SizeConfig.scaleHeight(2.5),
+            bottom: widget.position == ToastPosition.bottom
+                ? SizeConfig.scaleHeight(10)
+                : 0,
           ),
           child: FadeTransition(
             opacity: _fadeAnimation,

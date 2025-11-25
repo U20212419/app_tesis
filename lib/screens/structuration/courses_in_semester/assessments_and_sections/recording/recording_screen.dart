@@ -5,11 +5,13 @@ import 'package:app_tesis/screens/structuration/courses_in_semester/assessments_
 import 'package:app_tesis/widgets/custom_dialog.dart';
 import 'package:app_tesis/widgets/custom_toast.dart';
 import 'package:camera/camera.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../../../../../providers/statistics_provider.dart';
 import '../../../../../theme/app_colors.dart';
@@ -48,6 +50,8 @@ class _RecordingScreenState extends State<RecordingScreen> with WidgetsBindingOb
 
   late StatisticsProvider _statisticsProvider;
   bool _isInit = true;
+
+  bool _isAppInForeground = true;
 
   @override
   void initState() {
@@ -92,6 +96,38 @@ class _RecordingScreenState extends State<RecordingScreen> with WidgetsBindingOb
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final CameraController? cameraController = _controller;
+
+    // Update visibility status
+    if (state == AppLifecycleState.resumed) {
+      _isAppInForeground = true;
+      if (_isProcessing) {
+        setState(() {});
+      }
+    } else if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      _isAppInForeground = false;
+    }
+
+    // Handle camera state changes
+    if (cameraController == null || !cameraController.value.isInitialized) {
+      return;
+    }
+
+    if (state == AppLifecycleState.inactive) {
+      if (_isRecording) {
+        log('App inactive: stopping recording.');
+        _onStopButtonPressed();
+      }
+    } else if (state == AppLifecycleState.resumed) {
+      if (!_controller!.value.isInitialized) {
+        log('App resumed: re-initializing camera.');
+        _initializeCamera();
+      }
+    }
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_isInit) {
@@ -117,28 +153,6 @@ class _RecordingScreenState extends State<RecordingScreen> with WidgetsBindingOb
       DeviceOrientation.landscapeRight,
     ]);
     super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    final CameraController? cameraController = _controller;
-
-    if (cameraController == null || !cameraController.value.isInitialized) {
-      return;
-    }
-
-    if (state == AppLifecycleState.inactive) {
-      // Stops the recording if the app goes inactive
-      if (_isRecording) {
-        log('App inactive - stopping recording');
-        _onStopButtonPressed();
-      }
-    } else if (state == AppLifecycleState.resumed) {
-      if (!_controller!.value.isInitialized) {
-        log('App resumed - reinitializing camera');
-        _initializeCamera();
-      }
-    }
   }
 
   Future<void> _initializeCamera() async {
@@ -302,6 +316,7 @@ class _RecordingScreenState extends State<RecordingScreen> with WidgetsBindingOb
   }
 
   Future<void> _startProcessing(XFile videoFile) async {
+    WakelockPlus.enable(); // Keep the screen awake during processing
     setState(() {
       _isProcessing = true;
     });
@@ -309,6 +324,7 @@ class _RecordingScreenState extends State<RecordingScreen> with WidgetsBindingOb
     final provider = Provider.of<StatisticsProvider>(context, listen: false);
     bool success = false;
     Map<String, dynamic>? statsData;
+    String? errorMessage;
 
     try {
       success = await provider.startVideoProcessing(
@@ -328,23 +344,30 @@ class _RecordingScreenState extends State<RecordingScreen> with WidgetsBindingOb
         log('Received statistics data: $statsData');
       }
     } catch (e) {
-      if (mounted) {
-        final errorMessage = e.toString().replaceFirst("Exception: ", "");
-        CustomToast.show(
-          context: context,
-          title: 'Error de procesamiento',
-          detail: errorMessage,
-          type: CustomToastType.error,
-          position: ToastPosition.top,
-        );
-      }
+      errorMessage = e.toString().replaceFirst("Exception: ", "");
     } finally {
+      WakelockPlus.disable();
+      // If the app is in background, wait until it comes to foreground to show results
+      while (!_isAppInForeground && mounted) {
+        log('App is in background, waiting to show processing result...');
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
+      log('App is in foreground, proceeding to show processing result.');
+
       if (mounted) {
         setState(() {
           _isProcessing = false;
         });
 
-        if (success && statsData != null) {
+        if (errorMessage != null) {
+          CustomToast.show(
+            context: context,
+            title: 'Error de procesamiento',
+            detail: errorMessage,
+            type: CustomToastType.error,
+            position: ToastPosition.top,
+          );
+        } else if (success && statsData != null) {
           final List<dynamic> scoresList = statsData['scores'] ?? [];
 
           if (scoresList.isEmpty) {
@@ -380,7 +403,20 @@ class _RecordingScreenState extends State<RecordingScreen> with WidgetsBindingOb
                       courseId: widget.courseId,
                     ),
               ),
-            );
+            ).then((_) {
+              if (mounted) {
+                log('Returned from ScoresConfirmationScreen, popping RecordingScreen.');
+                setState(() {
+                  _isRecording = false;
+                  _isProcessing = false;
+                  _capturedFrameTimestamps.clear();
+
+                  _isCameraReady = false;
+                });
+
+                _restartCamera();
+              }
+            });
           }
         } else {
           log('Video processing failed or statistics not available.');
@@ -390,6 +426,15 @@ class _RecordingScreenState extends State<RecordingScreen> with WidgetsBindingOb
         log('Video file deleted after processing: ${videoFile.path}');
       }
     }
+  }
+
+  Future<void> _restartCamera() async {
+    final oldController = _controller;
+    if (oldController != null) {
+      _controller = null;
+      await oldController.dispose();
+    }
+    _initializeCamera();
   }
 
   @override
