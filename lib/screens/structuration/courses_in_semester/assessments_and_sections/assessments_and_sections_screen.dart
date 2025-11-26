@@ -774,6 +774,26 @@ class _AssessmentsAndSectionsScreenState extends State<AssessmentsAndSectionsScr
               normalizedNumber.contains(normalizedQuery) ||
               combined.contains(normalizedQuery);
         }).toList();
+        // Group assessments by type and sort by number in ascending order
+        final typePriority = {
+          'Práctica Tipo A': 1,
+          'Práctica Tipo B': 2,
+          'Práctica Dirigida': 3,
+          'Tarea Académica': 4,
+          'Examen': 5,
+        };
+        filteredAssessments.sort((a, b) {
+          final priorityA = typePriority[a.type] ?? 999;
+          final priorityB = typePriority[b.type] ?? 999;
+
+          final int priorityResult = priorityA.compareTo(priorityB);
+
+          if (priorityResult != 0) {
+            return priorityResult;
+          } else {
+            return a.number.compareTo(b.number);
+          }
+        });
 
         if (filteredAssessments.isEmpty) {
           return Center(
@@ -852,6 +872,8 @@ class _AssessmentsAndSectionsScreenState extends State<AssessmentsAndSectionsScr
 
           return normalizedName.contains(normalizedQuery);
         }).toList();
+        // Sort sections alphabetically by name in ascending order
+        filteredSections.sort((a, b) => a.name.compareTo(b.name));
 
         if (filteredSections.isEmpty) {
           return Center(

@@ -367,6 +367,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
           normalizedCode.contains(normalizedQuery) ||
           combined.contains(normalizedQuery);
     }).toList();
+    // Sort courses alphabetically by name in ascending order
     filteredCourses.sort((a, b) => a.name.compareTo(b.name));
 
     if (filteredCourses.isEmpty) {
