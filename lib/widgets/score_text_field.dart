@@ -49,7 +49,7 @@ class ScoreTextField extends StatelessWidget {
               enabled: !isReadOnly && !isPlaceHolder,
               textAlign: TextAlign.center,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [
+              inputFormatters: isReadOnly ? [] : [
                 // Allow only numbers with up to two decimal places
                 FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
               ],

@@ -372,6 +372,8 @@ class _CoursesInSemesterScreenState extends State<CoursesInSemesterScreen> {
                           .where((course) =>
                               !coursesAlreadyInSemester.contains(course.id))
                           .toList();
+                      // Sort courses alphabetically by name in ascending order
+                      availableCourses.sort((a, b) => a.name.compareTo(b.name));
 
                       if (availableCourses.isEmpty) {
                         CustomToast.show(

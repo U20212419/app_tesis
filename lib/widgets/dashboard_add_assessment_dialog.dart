@@ -46,6 +46,11 @@ Future<void> showDashboardAddAssessmentDialog({
   final sectionProvider = Provider.of<SectionProvider>(dialogContext, listen: false);
 
   final semestersList = await semesterProvider.fetchSemestersList();
+  semestersList.sort((a, b) {
+    final aVal = a.year * 10 + a.number; // 2024-2 -> 20242
+    final bVal = b.year * 10 + b.number;
+    return bVal.compareTo(aVal); // Descending
+  });
   semesters = semestersList;
 
   if (!dialogContext.mounted) return;
@@ -92,6 +97,8 @@ Future<void> showDashboardAddAssessmentDialog({
 
                   setState(() {
                     courses = coursesList.map((e) => e.course).toList();
+                    // Sort courses alphabetically by name in ascending order
+                    courses.sort((a, b) => a.name.compareTo(b.name));
                   });
                 },
                 validator: (value) {
@@ -131,10 +138,35 @@ Future<void> showDashboardAddAssessmentDialog({
                       semesterId,
                       courseId
                   );
+
+                  // Group assessments by type and sort by number in ascending order
+                  final typePriority = {
+                    'Práctica Tipo A': 1,
+                    'Práctica Tipo B': 2,
+                    'Práctica Dirigida': 3,
+                    'Tarea Académica': 4,
+                    'Examen': 5,
+                  };
+                  assessmentsList.sort((a, b) {
+                    final priorityA = typePriority[a.type] ?? 999;
+                    final priorityB = typePriority[b.type] ?? 999;
+
+                    final int priorityResult = priorityA.compareTo(priorityB);
+
+                    if (priorityResult != 0) {
+                      return priorityResult;
+                    } else {
+                      return a.number.compareTo(b.number);
+                    }
+                  });
+
                   final sectionsList = await sectionProvider.fetchSectionsList(
                       semesterId,
                       courseId
                   );
+
+                  // Sort sections alphabetically by name in ascending order
+                  sectionsList.sort((a, b) => a.name.compareTo(b.name));
 
                   if (!dialogContext.mounted) return;
 

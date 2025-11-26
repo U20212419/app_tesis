@@ -176,6 +176,9 @@ class _RecordingScreenState extends State<RecordingScreen> with WidgetsBindingOb
       // Lock orientation to portrait mode
       await _controller!.lockCaptureOrientation(DeviceOrientation.portraitUp);
 
+      // Set focus mode to auto to ensure clarity
+      await _controller!.setFocusMode(FocusMode.auto);
+
       if (mounted) {
         setState(() {
           _isCameraReady = true;
