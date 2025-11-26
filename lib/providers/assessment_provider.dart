@@ -95,6 +95,7 @@ class AssessmentProvider with ChangeNotifier {
       int idCourse,
       CourseInSemesterProvider courseInSemesterProvider
   ) async {
+    if (_isLoading) return;
     _isLoading = true;
     notifyListeners();
 
@@ -127,6 +128,7 @@ class AssessmentProvider with ChangeNotifier {
       String number,
       String? questionAmount
   ) async {
+    if (_isLoading) return;
     _isLoading = true;
     notifyListeners();
 
@@ -155,6 +157,7 @@ class AssessmentProvider with ChangeNotifier {
 
   // Soft delete an existing assessment
   Future<void> deleteAssessment(int id) async {
+    if (_isLoading) return;
     _isLoading = true;
     notifyListeners();
 

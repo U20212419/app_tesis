@@ -121,6 +121,7 @@ class CourseInSemesterProvider with ChangeNotifier {
       SemesterProvider semesterProvider,
       CourseProvider courseProvider
   ) async {
+    if (_isLoading) return;
     _isLoading = true;
     notifyListeners();
 
@@ -148,6 +149,7 @@ class CourseInSemesterProvider with ChangeNotifier {
       SemesterProvider semesterProvider,
       CourseProvider courseProvider
   ) async {
+    if (_isLoading) return;
     _isLoading = true;
     notifyListeners();
 

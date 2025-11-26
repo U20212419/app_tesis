@@ -141,10 +141,13 @@ class _EditSemesterScreenState extends State<EditSemesterScreen> {
   Widget build(BuildContext context) {
     SizeConfig.init(context);
 
-    return BaseCreationScreen(
+    final isLoading = context.watch<SemesterProvider>().isLoading;
+
+    return BaseFormScreen(
         title: 'Semestres - Edición',
         onSave: _saveForm,
-        body: _buildForm()
+        body: _buildForm(),
+        isLoading: isLoading,
     );
   }
 

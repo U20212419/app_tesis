@@ -74,10 +74,13 @@ class _CreateSemesterScreenState extends State<CreateSemesterScreen> {
   Widget build(BuildContext context) {
     SizeConfig.init(context);
 
-    return BaseCreationScreen(
+    final isLoading = context.watch<SemesterProvider>().isLoading;
+
+    return BaseFormScreen(
         title: 'Semestres - Creación',
         onSave: _saveForm,
-        body: _buildForm()
+        body: _buildForm(),
+        isLoading: isLoading,
     );
   }
 

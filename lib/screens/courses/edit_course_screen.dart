@@ -140,10 +140,13 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
   Widget build(BuildContext context) {
     SizeConfig.init(context);
 
-    return BaseCreationScreen(
+    final isLoading = context.watch<CourseProvider>().isLoading;
+
+    return BaseFormScreen(
         title: 'Cursos - Edición',
         onSave: _saveForm,
-        body: _buildForm()
+        body: _buildForm(),
+        isLoading: isLoading,
     );
   }
 

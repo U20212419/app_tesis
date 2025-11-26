@@ -184,7 +184,7 @@ class _StatisticsDashboardScreenState extends State<StatisticsDashboardScreen> {
     _handleCleanUp();
   }
 
-  Excel _generateExcel(List<StatisticsData> statsList) {
+  Excel _generateExcel(Set<StatisticsData> statsList) {
     final Excel excel = Excel.createExcel();
     // Retrieve default sheet and rename it
     final String defaultSheet = excel.getDefaultSheet().toString();
@@ -193,7 +193,7 @@ class _StatisticsDashboardScreenState extends State<StatisticsDashboardScreen> {
 
     // Add data rows
     for (int i = 0; i < statsList.length; i++) {
-      final stats = statsList[i];
+      final stats = statsList.elementAt(i);
       // Add header row
       const headers = [
         'Semestre',
@@ -329,7 +329,7 @@ class _StatisticsDashboardScreenState extends State<StatisticsDashboardScreen> {
 
   static const platform = MethodChannel("com.app_tesis.storage");
 
-  Future<void> _exportExcel(List<StatisticsData> statsList) async {
+  Future<void> _exportExcel(Set<StatisticsData> statsList) async {
     final excel = _generateExcel(statsList);
     final encoded = excel.encode();
     if (encoded == null) {
@@ -518,7 +518,7 @@ class _StatisticsDashboardScreenState extends State<StatisticsDashboardScreen> {
   }
 }
 
-Widget _buildDashboardBody(List<StatisticsData> statsList) {
+Widget _buildDashboardBody(Set<StatisticsData> statsList) {
   if (statsList.isEmpty) {
     return const Center(
         child: CircularProgressIndicator(
@@ -535,7 +535,7 @@ Widget _buildDashboardBody(List<StatisticsData> statsList) {
           children: [
             ...statsList.map((data) => StatsBannerCard(
               statsData: data,
-              color: switch (statsList.indexOf(data) % 4) {
+              color: switch (statsList.toList().indexOf(data) % 4) {
                 0 => AppColors.highlightLightest,
                 1 => AppColors.supportWarningLight,
                 2 => AppColors.supportSuccessLight,

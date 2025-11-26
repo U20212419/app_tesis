@@ -7,7 +7,7 @@ import '../theme/app_text_styles.dart';
 import '../utils/size_config.dart';
 
 class ComparisonQuestionBarChart extends StatelessWidget {
-  final List<StatisticsData> statsDataList;
+  final Set<StatisticsData> statsDataList;
   final String? label;
 
   // Maximum number of questions to display in the chart
@@ -55,7 +55,7 @@ class ComparisonQuestionBarChart extends StatelessWidget {
       final List<BarChartRodData> rods = [];
 
       for (int j = 0; j < statsDataList.length; j++) {
-        final statsData = statsDataList[j];
+        final statsData = statsDataList.elementAt(j);
         final aggStats = statsData.stats['statistics'] ?? {};
         final qStats = (aggStats['question_stats'] as Map<String, dynamic>?) ?? {};
         final qData = (qStats[questionKey] as Map<String, dynamic>?) ?? {};

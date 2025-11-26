@@ -110,6 +110,7 @@ class CourseProvider with ChangeNotifier {
 
   // Add a new course
   Future<void> addCourse(String code, String name) async {
+    if (_isLoading) return;
     _isLoading = true;
     notifyListeners();
 
@@ -130,6 +131,7 @@ class CourseProvider with ChangeNotifier {
 
   // Update an existing course
   Future<void> updateCourse(int id, String code, String name) async {
+    if (_isLoading) return;
     _isLoading = true;
     notifyListeners();
 
@@ -157,6 +159,7 @@ class CourseProvider with ChangeNotifier {
       SemesterProvider semesterProvider,
       CourseInSemesterProvider courseInSemesterProvider
   ) async {
+    if (_isLoading) return;
     _isLoading = true;
     notifyListeners();
 

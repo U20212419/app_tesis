@@ -97,10 +97,13 @@ class _CreateAssessmentScreenState extends State<CreateAssessmentScreen> {
   Widget build(BuildContext context) {
     SizeConfig.init(context);
 
-    return BaseCreationScreen(
+    final isLoading = context.watch<AssessmentProvider>().isLoading;
+
+    return BaseFormScreen(
         title: 'Evaluaciones - Creación',
         onSave: _saveForm,
-        body: _buildForm()
+        body: _buildForm(),
+        isLoading: isLoading,
     );
   }
 

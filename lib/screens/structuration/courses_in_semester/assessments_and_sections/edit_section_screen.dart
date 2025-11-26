@@ -130,10 +130,13 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
   Widget build(BuildContext context) {
     SizeConfig.init(context);
 
-    return BaseCreationScreen(
+    final isLoading = context.watch<SectionProvider>().isLoading;
+
+    return BaseFormScreen(
         title: 'Horarios - Edición',
         onSave: _saveForm,
-        body: _buildForm()
+        body: _buildForm(),
+        isLoading: isLoading,
     );
   }
 

@@ -130,6 +130,7 @@ class SemesterProvider with ChangeNotifier {
 
   // Add a new semester
   Future<void> addSemester(String year, String number) async {
+    if (_isLoading) return;
     _isLoading = true;
     notifyListeners();
 
@@ -150,6 +151,7 @@ class SemesterProvider with ChangeNotifier {
 
   // Update an existing semester
   Future<void> updateSemester(int id, String year, String number) async {
+    if (_isLoading) return;
     _isLoading = true;
     notifyListeners();
 
@@ -178,6 +180,7 @@ class SemesterProvider with ChangeNotifier {
       CourseProvider courseProvider,
       CourseInSemesterProvider courseInSemesterProvider
   ) async {
+    if (_isLoading) return;
     _isLoading = true;
     notifyListeners();
 

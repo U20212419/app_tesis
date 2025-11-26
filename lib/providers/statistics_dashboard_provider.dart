@@ -27,8 +27,8 @@ class StatisticsDashboardProvider with ChangeNotifier {
 
   StatisticsDashboardProvider.empty();
 
-  List<StatisticsData> _statsList = [];
-  List<StatisticsData> get statsList => _statsList;
+  Set<StatisticsData> _statsList = {};
+  Set<StatisticsData> get statsList => _statsList;
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -41,7 +41,7 @@ class StatisticsDashboardProvider with ChangeNotifier {
   }
 
   void clearStats() {
-    _statsList = [];
+    _statsList = {};
     notifyListeners();
   }
 

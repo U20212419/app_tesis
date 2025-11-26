@@ -36,6 +36,7 @@ class StatisticsProvider with ChangeNotifier {
     required int questionAmount,
     List<int>? framesIndexes
   }) async {
+    if (_isLoading) return false;
     _isLoading = true;
     _latestStats = null;
     _isPollingActive = true;
@@ -150,6 +151,7 @@ class StatisticsProvider with ChangeNotifier {
       List<Map<String, dynamic>>? newScores,
       String? status
   ) async {
+    if (_isLoading) return;
     _isLoading = true;
     notifyListeners();
 
@@ -169,6 +171,7 @@ class StatisticsProvider with ChangeNotifier {
 
   // Delete statistics
   Future<void> deleteStatistics(int assessmentId, int sectionId) async {
+    if (_isLoading) return;
     _isLoading = true;
     notifyListeners();
 

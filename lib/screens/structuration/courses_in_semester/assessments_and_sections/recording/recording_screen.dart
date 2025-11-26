@@ -5,7 +5,6 @@ import 'package:app_tesis/screens/structuration/courses_in_semester/assessments_
 import 'package:app_tesis/widgets/custom_dialog.dart';
 import 'package:app_tesis/widgets/custom_toast.dart';
 import 'package:camera/camera.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -405,7 +404,7 @@ class _RecordingScreenState extends State<RecordingScreen> with WidgetsBindingOb
               ),
             ).then((_) {
               if (mounted) {
-                log('Returned from ScoresConfirmationScreen, popping RecordingScreen.');
+                log('Returned from ScoresConfirmationScreen, resetting RecordingScreen.');
                 setState(() {
                   _isRecording = false;
                   _isProcessing = false;

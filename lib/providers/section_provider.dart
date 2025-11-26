@@ -93,6 +93,7 @@ class SectionProvider with ChangeNotifier {
       int idCourse,
       CourseInSemesterProvider courseInSemesterProvider
   ) async {
+    if (_isLoading) return;
     _isLoading = true;
     notifyListeners();
 
@@ -121,6 +122,7 @@ class SectionProvider with ChangeNotifier {
       int id,
       String name
   ) async {
+    if (_isLoading) return;
     _isLoading = true;
     notifyListeners();
 
@@ -147,6 +149,7 @@ class SectionProvider with ChangeNotifier {
 
   // Soft delete an existing section
   Future<void> deleteSection(int id) async {
+    if (_isLoading) return;
     _isLoading = true;
     notifyListeners();
 
