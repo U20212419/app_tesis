@@ -7,7 +7,7 @@ If you use this software in your project or research, please cite it as follows:
 
 **BibTeX:**
 ```bibtex
-@software{app_tesis_backend,
+@software{app_tesis,
   author       = {Huaman Alvarado, Flavio Angello},
   title        = {Physical Assessment Scores Monitoring System - Frontend},
   year         = 2025,
